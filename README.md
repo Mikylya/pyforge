@@ -37,6 +37,13 @@ I started PyForge in May 2025, when I was in 8th grade. The idea was simple: bui
 
 **What I learned:** Always check the browser console when something doesn't work. And don't paste code "by eye" — check for duplicates.
 
+## Early versions
+
+The `history/` folder contains early versions of PyForge from May–September 2025. They show the evolution from a simple lesson checker to a full platform:
+- `v1_may_2025.html` — the first working prototype (lessons only, no AI).
+- `v2_july_2025.html` — added AI tutor and achievements.
+- `v3_september_2025.html` — added 28 lessons, 3 languages, and a premium system.
+- 
 ## Roadmap
 
 - Add new topics (file handling, error handling)
