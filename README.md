@@ -46,11 +46,11 @@ I started PyForge in May 2025, when I was in 8th grade. The idea was simple: bui
 
 ## Screenshots
 ### Main screen — 5 learning modules with progress
-
+![Main screen](main.png)
 ### Theory and practice — explanation, code example, and coding tasks
-
+![Theory](theory.png)
 ### Code Arena — timed tasks with lives and score
-
+![Arena](arena.png)
 ### Sorting visualizer — algorithm animation on Canvas
-
+![Visualizer](viz.png)
 
