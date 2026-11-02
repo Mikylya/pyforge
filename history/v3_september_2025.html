@@ -1,0 +1,4238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>PyForge — 代码熔炉</title>
+    <style>
+        /* ============================================================
+           СТИЛИ — Я ИХ ПЕРЕПИСЫВАЛА 3 РАЗА, ПОКА НЕ ПОНРАВИЛОСЬ
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .app {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #1e293b;
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .header-left h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+        .lang-switch {
+            display: flex;
+            gap: 0.2rem;
+            background: #0f172a;
+            border-radius: 30px;
+            padding: 0.15rem;
+            border: 1px solid #334155;
+        }
+        .lang-switch button {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .lang-switch button.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .lang-switch button:hover:not(.active) {
+            color: white;
+        }
+        .badge {
+            background: #334155;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        .badge span {
+            color: #60a5fa;
+            font-weight: 700;
+        }
+        .badge-premium {
+            background: #7c3aed;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .badge-premium.unlocked {
+            background: #22c55e;
+        }
+        .achievements-bar {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            background: #0f172a;
+            padding: 0.5rem 1rem;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+        .achievements-bar .label {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            margin-right: 0.3rem;
+        }
+        .achievement {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            background: #1e293b;
+            padding: 0.15rem 0.6rem 0.15rem 0.3rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            border: 1px solid #334155;
+            transition: 0.3s;
+        }
+        .achievement.unlocked {
+            border-color: #fbbf24;
+            color: #fbbf24;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.12);
+        }
+        .premium-banner {
+            background: linear-gradient(135deg, #2e1065, #7c3aed);
+            border-radius: 16px;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            border: 1px solid #a78bfa;
+        }
+        .premium-banner .info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+        .premium-banner .info .icon {
+            font-size: 1.5rem;
+        }
+        .premium-banner .info .text {
+            font-size: 0.85rem;
+            color: #e2e8f0;
+        }
+        .premium-banner .info .text strong {
+            color: #fbbf24;
+        }
+        .premium-banner .info .text .features {
+            font-size: 0.75rem;
+            color: #cbd5e1;
+            margin-top: 0.2rem;
+        }
+        .premium-banner .actions {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+        .btn-premium {
+            background: #fbbf24;
+            color: #0f172a;
+            padding: 0.4rem 1.2rem;
+            border: none;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-premium:hover {
+            transform: scale(1.05);
+            background: #fcd34d;
+        }
+        .btn-premium.unlocked {
+            background: #22c55e;
+            color: white;
+            cursor: default;
+        }
+        .btn-premium.unlocked:hover {
+            transform: none;
+        }
+        .btn-boosty {
+            background: #334155;
+            color: #e2e8f0;
+            padding: 0.4rem 1.2rem;
+            border: 1px solid #64748b;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-boosty:hover {
+            background: #475569;
+            border-color: #94a3b8;
+        }
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 1.5rem;
+        }
+        @media (max-width: 800px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .lesson-nav {
+            display: flex;
+            gap: 0.3rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+            scrollbar-width: thin;
+        }
+        .lesson-nav button {
+            background: #334155;
+            border: none;
+            color: #94a3b8;
+            padding: 0.25rem 0.6rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: 0.2s;
+            font-weight: 500;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .lesson-nav button.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .lesson-nav button.done {
+            border: 2px solid #22c55e;
+        }
+        .lesson-nav button.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .lesson-nav button.locked::after {
+            content: ' 🔒';
+            font-size: 0.5rem;
+        }
+        .lesson-nav button:hover:not(.active):not(.locked) {
+            background: #475569;
+            color: white;
+        }
+        .lesson-content {
+            background: #0f172a;
+            border-radius: 16px;
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+        .lesson-content h2 {
+            font-size: 1.2rem;
+            margin-bottom: 0.4rem;
+            color: #f1f5f9;
+        }
+        .lesson-content .theory {
+            color: #cbd5e1;
+            line-height: 1.8;
+            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
+            white-space: pre-wrap;
+        }
+        .lesson-content .example {
+            background: #1e293b;
+            border-left: 4px solid #3b82f6;
+            padding: 0.6rem 1rem;
+            border-radius: 0 8px 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-bottom: 0.8rem;
+            color: #e2e8f0;
+        }
+        .lesson-content .lock-overlay {
+            background: rgba(15, 23, 42, 0.85);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin: 1rem 0;
+            border: 2px dashed #7c3aed;
+        }
+        .lesson-content .lock-overlay .lock-icon {
+            font-size: 2.5rem;
+        }
+        .lesson-content .lock-overlay p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        .tasks-section {
+            margin-top: 1rem;
+        }
+        .task-item {
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 0.5rem 0.7rem;
+            margin-bottom: 0.4rem;
+            border-left: 3px solid #334155;
+            transition: 0.2s;
+        }
+        .task-item.bonus {
+            border-left-color: #8b5cf6;
+            opacity: 0.85;
+        }
+        .task-item.completed {
+            border-left-color: #22c55e;
+            background: #0f2a1a;
+        }
+        .task-item .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+        }
+        .task-item .task-text {
+            font-size: 0.8rem;
+            color: #e2e8f0;
+            flex: 1;
+        }
+        .task-item .task-status {
+            font-size: 0.6rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 10px;
+            background: #334155;
+            color: #94a3b8;
+            white-space: nowrap;
+        }
+        .task-item .task-status.done {
+            background: #064e3b;
+            color: #86efac;
+        }
+        .task-item .task-status.bonus-label {
+            background: #2e1065;
+            color: #a78bfa;
+        }
+        .task-item .task-actions {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 0.25rem;
+            flex-wrap: wrap;
+        }
+        .task-item .task-actions .btn-sm {
+            padding: 0.12rem 0.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-sm.primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-sm.primary:hover {
+            background: #2563eb;
+        }
+        .btn-sm.secondary {
+            background: #334155;
+            color: #94a3b8;
+        }
+        .btn-sm.secondary:hover {
+            background: #475569;
+            color: white;
+        }
+        .btn-sm.ai-hint {
+            background: #7c3aed;
+            color: white;
+        }
+        .btn-sm.ai-hint:hover {
+            background: #6d28d9;
+        }
+        .task-item .task-input {
+            width: 100%;
+            min-height: 38px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            padding: 0.3rem;
+            resize: vertical;
+            outline: none;
+            transition: border 0.2s;
+            margin-top: 0.2rem;
+        }
+        .task-item .task-input:focus {
+            border-color: #3b82f6;
+        }
+        .task-item .task-input:disabled {
+            opacity: 0.6;
+        }
+        .task-item .task-result {
+            margin-top: 0.25rem;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            display: none;
+        }
+        .task-item .task-result.show {
+            display: block;
+        }
+        .task-item .task-result.success {
+            background: #064e3b;
+            color: #86efac;
+            border: 1px solid #22c55e;
+        }
+        .task-item .task-result.error {
+            background: #7f1d1d;
+            color: #fca5a5;
+            border: 1px solid #ef4444;
+        }
+        .task-item .task-result.hint {
+            background: #1e1b4b;
+            color: #a78bfa;
+            border: 1px solid #7c3aed;
+        }
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin: 0.6rem 0;
+        }
+        .btn {
+            padding: 0.4rem 1rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-secondary {
+            background: #334155;
+            color: #94a3b8;
+        }
+        .btn-secondary:hover {
+            background: #475569;
+            color: white;
+        }
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #16a34a;
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .progress-bar-wrap {
+            background: #334155;
+            border-radius: 20px;
+            height: 5px;
+            overflow: hidden;
+            margin-top: 0.6rem;
+        }
+        .progress-bar-wrap .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #a78bfa);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 20px;
+        }
+        .main-result {
+            padding: 0.4rem 0.7rem;
+            border-radius: 8px;
+            margin: 0.2rem 0 0;
+            font-size: 0.8rem;
+            display: none;
+        }
+        .main-result.success {
+            display: block;
+            background: #064e3b;
+            border: 1px solid #22c55e;
+            color: #86efac;
+        }
+        .main-result.show {
+            display: block;
+        }
+        .ai-sidebar {
+            background: #0f172a;
+            border-radius: 16px;
+            padding: 0.8rem;
+            height: fit-content;
+            position: sticky;
+            top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        .ai-sidebar h3 {
+            font-size: 0.9rem;
+            color: #a78bfa;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .ai-chat {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+        .ai-message {
+            padding: 0.4rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            max-width: 95%;
+            white-space: pre-wrap;
+        }
+        .ai-message.bot {
+            background: #1e293b;
+            color: #e2e8f0;
+            align-self: flex-start;
+            border-bottom-left-radius: 3px;
+        }
+        .ai-message.user {
+            background: #3b82f6;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 3px;
+        }
+        .ai-input-row {
+            display: flex;
+            gap: 0.4rem;
+            margin-top: 0.2rem;
+        }
+        .ai-input-row input {
+            flex: 1;
+            padding: 0.4rem 0.6rem;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: #e2e8f0;
+            font-size: 0.8rem;
+            outline: none;
+        }
+        .ai-input-row input:focus {
+            border-color: #7c3aed;
+        }
+        .ai-input-row input::placeholder {
+            color: #64748b;
+        }
+        .ai-input-row button {
+            background: #7c3aed;
+            border: none;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .ai-input-row button:hover {
+            background: #6d28d9;
+        }
+        .ai-quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-top: 0.1rem;
+        }
+        .ai-quick-actions button {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #94a3b8;
+            padding: 0.15rem 0.5rem;
+            border-radius: 30px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .ai-quick-actions button:hover {
+            background: #334155;
+            color: white;
+            border-color: #7c3aed;
+        }
+        .save-notice {
+            background: #1e293b;
+            padding: 0.3rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 0.3rem;
+            border: 1px solid #334155;
+        }
+        @media (max-width: 600px) {
+            .app {
+                padding: 0.8rem;
+            }
+            .header-left h1 {
+                font-size: 1.1rem;
+            }
+            .lesson-content {
+                padding: 0.8rem;
+            }
+            .task-item {
+                padding: 0.4rem;
+            }
+            .btn {
+                padding: 0.3rem 0.7rem;
+                font-size: 0.7rem;
+            }
+            .ai-sidebar {
+                position: static;
+            }
+            .main-grid {
+                gap: 0.8rem;
+            }
+            .ai-chat {
+                max-height: 200px;
+            }
+            .premium-banner {
+                flex-direction: column;
+                text-align: center;
+            }
+            .premium-banner .actions {
+                justify-content: center;
+            }
+            .lesson-nav button {
+                font-size: 0.6rem;
+                padding: 0.2rem 0.4rem;
+            }
+            .lang-switch button {
+                font-size: 0.6rem;
+                padding: 0.1rem 0.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app" id="app">
+        <!-- ШАПКА -->
+        <div class="header">
+            <div class="header-left">
+                <h1>⚔️ PyForge</h1>
+            </div>
+            <div class="header-right">
+                <div class="lang-switch" id="langSwitch">
+                    <button data-lang="ru" class="active">🇷🇺 RU</button>
+                    <button data-lang="en">🇬🇧 EN</button>
+                    <button data-lang="zh">🇨🇳 中文</button>
+                </div>
+                <div class="badge" id="premiumBadge">⭐ Free</div>
+                <div class="badge">🎯 XP: <span id="xpDisplay">0</span></div>
+                <div class="badge">📚 <span id="currentLessonNum">1</span>/<span id="totalLessons">28</span></div>
+            </div>
+        </div>
+
+        <!-- ДОСТИЖЕНИЯ -->
+        <div class="achievements-bar" id="achievementsBar">
+            <span class="label" data-i18n="achievements">🏆 成就</span>
+            <div class="achievement" id="achFirstBlood"><span class="icon">⚡</span> First Blood</div>
+            <div class="achievement" id="achPerfectionist"><span class="icon">💎</span> Perfectionist</div>
+            <div class="achievement" id="achSpeedDemon"><span class="icon">🔥</span> Speed Demon</div>
+            <div class="achievement" id="achScholar"><span class="icon">📖</span> Scholar</div>
+            <div class="achievement" id="achMaster"><span class="icon">👑</span> Master</div>
+            <div class="achievement" id="achSupporter"><span class="icon">💜</span> Supporter</div>
+        </div>
+
+        <!-- PREMIUM-БАННЕР -->
+        <div class="premium-banner" id="premiumBanner">
+            <div class="info">
+                <span class="icon">⭐</span>
+                <div class="text">
+                    <div><strong data-i18n="premium_title">⭐ 高级访问</strong></div>
+                    <div class="features" data-i18n="premium_features">
+                        🔓 8 节独家课程 · 🤖 高级 AI · 📜 证书
+                    </div>
+                </div>
+            </div>
+            <div class="actions">
+                <a href="#" class="btn-boosty" id="boostyBtn" target="_blank">❤️ 在 Boosty 上支持</a>
+                <button class="btn-premium" id="unlockPremiumBtn" data-i18n="premium_btn">⭐ 解锁高级版</button>
+            </div>
+        </div>
+
+        <!-- ОСНОВНАЯ СЕТКА -->
+        <div class="main-grid">
+            <div>
+                <div class="lesson-nav" id="lessonNav"></div>
+                <div class="lesson-content" id="lessonContent">
+                    <h2 id="lessonTitle">变量</h2>
+                    <div class="theory" id="lessonTheory"></div>
+                    <div class="example" id="lessonExample"></div>
+                    <div id="lockOverlay" style="display:none;"></div>
+                    <div class="tasks-section" id="tasksContainer"></div>
+                </div>
+                <div class="main-result" id="mainResult"></div>
+                <div class="actions">
+                    <button class="btn btn-secondary" id="resetBtn" data-i18n="reset">↺ 重置全部</button>
+                    <button class="btn btn-success" id="nextBtn" disabled data-i18n="next">→ 下一课</button>
+                </div>
+                <div class="progress-bar-wrap">
+                    <div class="fill" id="progressFill"></div>
+                </div>
+                <div class="save-notice" id="saveNotice">💾 进度自动保存</div>
+            </div>
+
+            <!-- AI САЙДБАР -->
+            <div class="ai-sidebar">
+                <h3><span>🤖</span> <span data-i18n="ai_tutor">AI 助手</span></h3>
+                <div class="ai-chat" id="aiChat">
+                    <div class="ai-message bot" data-i18n="ai_welcome">
+                        👋 你好！我是你的 AI 助手。问我提示、解释，或者告诉我你想学什么！
+                    </div>
+                </div>
+                <div class="ai-quick-actions">
+                    <button data-hint="hint" data-i18n="hint">💡 提示</button>
+                    <button data-hint="explain" data-i18n="explain">📖 解释</button>
+                    <button data-hint="plan" data-i18n="plan">📋 计划</button>
+                    <button data-hint="fix" data-i18n="fix">🔧 修复</button>
+                </div>
+                <div class="ai-input-row">
+                    <input type="text" id="aiInput" data-i18n-placeholder="ask_ai" placeholder="问 AI 任何问题..." />
+                    <button id="aiSendBtn" data-i18n="send">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        //  ПЕРЕВОДЫ — ТЕПЕРЬ НА ТРЁХ ЯЗЫКАХ!
+        //  Я СОНЯ, И Я СДЕЛАЛА ЭТОТ ПЕРЕВОД С ПОМОЩЬЮ ДРУЗЕЙ И ГУГЛА
+        // ================================================================
+        const LANG = {
+            ru: {
+                achievements: '🏆 Достижения:',
+                reset: '↺ Сбросить всё',
+                next: '→ Следующий урок',
+                ai_tutor: 'AI-помощник',
+                ai_welcome: '👋 Привет! Я твой AI-помощник. Спрашивай подсказки, объяснения, или скажи, что хочешь изучить!',
+                hint: '💡 Подсказка',
+                explain: '📖 Объяснить',
+                plan: '📋 План',
+                fix: '🔧 Исправить',
+                send: 'Отправить',
+                ask_ai: 'Спроси AI о чём угодно...',
+                required: '⭐ Обязательная',
+                bonus: '🌟 Доп.',
+                done: '✅ Готово',
+                check: '▶ Проверить',
+                reset_task: '↺ Сбросить',
+                ai_hint: '🤖 Подсказка',
+                write_code: 'Напиши код здесь',
+                write_code_optional: 'Напиши код здесь (необязательно)',
+                correct: '🎉 Ура! Ты сделала это!',
+                wrong: '❌ Не совсем. Проверь кавычки, пробелы и двоеточия.',
+                write_something: '✏️ Эй! Ты забыл(а) написать код! 😅',
+                cant_reset: '⚠️ Обязательную задачу нельзя сбросить',
+                main_done: '✅ Обязательная задача решена!',
+                all_done: '🎉 Все задачи решены! Ты супер!',
+                congrats: '🏆 ПОЗДРАВЛЯЮ! Ты прошел(а) все 28 уроков! 👑',
+                reset_confirm: 'Сбросить весь прогресс?',
+                reset_done: '🔄 Прогресс сброшен.',
+                task_done_ai: '✅ Отлично! Ты решил(а) задачу',
+                keep_going: 'Продолжай! 🚀',
+                premium_title: '⭐ Premium доступ',
+                premium_features: '🔓 8 эксклюзивных уроков · 🤖 Расширенный AI · 📜 Сертификат',
+                premium_btn: '⭐ Разблокировать Premium',
+                premium_locked: '🔒 Этот урок доступен только в Premium',
+                premium_unlock: 'Поддержи проект на Boosty!',
+                premium_thanks: '💜 Спасибо за поддержку!',
+                premium_unlocked: '⭐ Premium разблокирован!',
+                support_done: 'Спасибо, что поддерживаешь PyForge!',
+            },
+            en: {
+                achievements: '🏆 Achievements:',
+                reset: '↺ Reset All',
+                next: '→ Next Lesson',
+                ai_tutor: 'AI Tutor',
+                ai_welcome: '👋 Hi! I\'m your AI tutor. Ask me for hints, explain concepts, or tell me what you want to learn!',
+                hint: '💡 Hint',
+                explain: '📖 Explain',
+                plan: '📋 Plan',
+                fix: '🔧 Fix',
+                send: 'Send',
+                ask_ai: 'Ask AI anything...',
+                required: '⭐ Required',
+                bonus: '🌟 Bonus',
+                done: '✅ Done',
+                check: '▶ Check',
+                reset_task: '↺ Reset',
+                ai_hint: '🤖 Hint',
+                write_code: 'Write code here',
+                write_code_optional: 'Write code here (optional)',
+                correct: '🎉 You did it!',
+                wrong: '❌ Not quite. Check quotes, spaces, and colons.',
+                write_something: '✏️ Hey! You forgot to write code! 😅',
+                cant_reset: '⚠️ Required task cannot be reset',
+                main_done: '✅ Main task done!',
+                all_done: '🎉 All tasks done! You\'re amazing!',
+                congrats: '🏆 CONGRATULATIONS! You completed all 28 lessons! 👑',
+                reset_confirm: 'Reset all progress?',
+                reset_done: '🔄 Progress reset.',
+                task_done_ai: '✅ Great job! You solved task',
+                keep_going: 'Keep going! 🚀',
+                premium_title: '⭐ Premium Access',
+                premium_features: '🔓 8 exclusive lessons · 🤖 Advanced AI · 📜 Certificate',
+                premium_btn: '⭐ Unlock Premium',
+                premium_locked: '🔒 This lesson is only available in Premium',
+                premium_unlock: 'Support the project on Boosty!',
+                premium_thanks: '💜 Thanks for your support!',
+                premium_unlocked: '⭐ Premium unlocked!',
+                support_done: 'Thanks for supporting PyForge!',
+            },
+            zh: {
+                achievements: '🏆 成就',
+                reset: '↺ 重置全部',
+                next: '→ 下一课',
+                ai_tutor: 'AI 助手',
+                ai_welcome: '👋 你好！我是你的 AI 助手。问我提示、解释，或者告诉我你想学什么！',
+                hint: '💡 提示',
+                explain: '📖 解释',
+                plan: '📋 计划',
+                fix: '🔧 修复',
+                send: '发送',
+                ask_ai: '问 AI 任何问题...',
+                required: '⭐ 必做',
+                bonus: '🌟 附加',
+                done: '✅ 完成',
+                check: '▶ 检查',
+                reset_task: '↺ 重置',
+                ai_hint: '🤖 提示',
+                write_code: '在这里写代码',
+                write_code_optional: '在这里写代码（可选）',
+                correct: '🎉 你做对了！太棒了！',
+                wrong: '❌ 不太对。检查引号、空格和冒号。',
+                write_something: '✏️ 嘿！你忘记写代码了！😅',
+                cant_reset: '⚠️ 必做任务不能重置',
+                main_done: '✅ 必做任务完成了！',
+                all_done: '🎉 所有任务都完成了！你太棒了！',
+                congrats: '🏆 恭喜你！你完成了全部 28 课！👑',
+                reset_confirm: '重置所有进度？',
+                reset_done: '🔄 进度已重置。',
+                task_done_ai: '✅ 做得好！你解决了任务',
+                keep_going: '继续加油！🚀',
+                premium_title: '⭐ 高级访问',
+                premium_features: '🔓 8 节独家课程 · 🤖 高级 AI · 📜 证书',
+                premium_btn: '⭐ 解锁高级版',
+                premium_locked: '🔒 此课程仅限高级版',
+                premium_unlock: '在 Boosty 上支持项目！',
+                premium_thanks: '💜 感谢你的支持！',
+                premium_unlocked: '⭐ 高级版已解锁！',
+                support_done: '感谢你支持 PyForge！',
+            }
+        };
+
+        let currentLang = 'ru';
+
+        // ================================================================
+        //  УРОКИ — 28 ШТУК, НА ТРЁХ ЯЗЫКАХ
+        //  СОЗДАНО СОНЕЙ
+        // ================================================================
+
+        // ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ СОЗДАНИЯ ЗАДАЧ
+        function makeTasks(obligatory, bonuses) {
+            const tasks = [];
+            tasks.push({
+                text_ru: '⭐ ' + obligatory.ru,
+                text_en: '⭐ ' + obligatory.en,
+                text_zh: '⭐ ' + obligatory.zh,
+                solution: obligatory.solution,
+                check: obligatory.check
+            });
+            for (let i = 0; i < bonuses.length; i++) {
+                tasks.push({
+                    text_ru: '🌟 ' + bonuses[i].ru,
+                    text_en: '🌟 ' + bonuses[i].en,
+                    text_zh: '🌟 ' + bonuses[i].zh,
+                    solution: bonuses[i].solution,
+                    check: bonuses[i].check
+                });
+            }
+            return tasks;
+        }
+
+                const LESSONS_DATA = [
+            // ============================================================
+            //  БЕСПЛАТНЫЕ УРОКИ 0-19 (20 ШТУК)
+            //  Теория — полная, для новичков
+            //  Задач — 6 (1 обязательная + 5 дополнительных)
+            // ============================================================
+
+            // ---- УРОК 0: ПЕРЕМЕННЫЕ ----
+            {
+                id: 0,
+                title: { ru: 'Переменные', en: 'Variables', zh: '变量' },
+                theory: {
+                    ru: `В Python переменная — это как коробка с наклейкой. Ты кладёшь в неё значение (число, текст или что угодно) и даёшь ей имя, чтобы потом легко найти это значение.
+
+            📌 Как создать переменную: имя_переменной = значение
+
+            Например:
+            name = "Анна"   — в переменную name положили текст "Анна"
+            age = 14        — в переменную age положили число 14
+
+            ✅ Имена переменных могут содержать буквы, цифры и символ подчёркивания (_), но не могут начинаться с цифры.
+
+            💡 Хорошие имена: name, age, is_student, my_var_1
+
+            🔥 Важно: Python различает большие и маленькие буквы! name и Name — это разные переменные.
+
+            🎯 В этом уроке ты научишься создавать переменные и класть в них разные значения.`,
+                    en: `In Python, a variable is like a box with a label. You put a value in it (number, text, or anything) and give it a name so you can find it later.
+
+            📌 How to create a variable: variable_name = value
+
+            For example:
+            name = "Anna"   — put the text "Anna" into the variable name
+            age = 14        — put the number 14 into the variable age
+
+            ✅ Variable names can contain letters, digits, and underscores (_), but cannot start with a digit.
+
+            💡 Good names: name, age, is_student, my_var_1
+
+            🔥 Important: Python is case-sensitive! name and Name are different variables.
+
+            🎯 In this lesson, you'll learn to create variables and put different values in them.`,
+                    zh: `在 Python 中，变量就像一个带标签的盒子。你把值放进去，给它一个名字，以便以后能找到它。
+
+            📌 如何创建变量：变量名 = 值
+
+            例如：
+            name = "安娜"   — 把文本 "安娜" 放入变量 name
+            age = 14        — 把数字 14 放入变量 age
+
+            ✅ 变量名可以包含字母、数字和下划线 (_)，但不能以数字开头。
+
+            💡 好的变量名：name, age, is_student, my_var_1
+
+            🔥 重要：Python 区分大小写！name 和 Name 是不同的变量。
+
+            🎯 在本课中，你将学习创建变量并赋予不同的值。`
+                },
+                example: {
+                    ru: `# Примеры переменных
+            name = "Анна"      # строка (текст)
+            age = 14            # целое число
+            height = 1.65       # число с точкой
+            is_student = True   # логическое значение`,
+                    en: `# Variable examples
+            name = "Anna"       # string (text)
+            age = 14            # integer
+            height = 1.65       # float
+            is_student = True   # boolean`,
+                    zh: `# 变量示例
+            name = "安娜"       # 字符串（文本）
+            age = 14            # 整数
+            height = 1.65       # 浮点数
+            is_student = True   # 布尔值`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Создай переменную name со значением "Анна"', en: 'Create variable name with value "Anna"',
+                        zh: '创建变量 name 并赋值为 "安娜"', solution: 'name = "Anna"',
+                        check: c => c.replace(/\s/g, '').includes('name="Anna"') || c.replace(/\s/g, '').includes(
+                            'name="Анна"') },
+                    [
+                        { ru: 'Создай переменную age со значением 14', en: 'Create variable age with value 14',
+                            zh: '创建变量 age 并赋值为 14', solution: 'age = 14',
+                            check: c => c.replace(/\s/g, '').includes('age=14') },
+                        { ru: 'Создай переменную city со значением "Москва"',
+                            en: 'Create variable city with value "Moscow"', zh: '创建变量 city 并赋值为 "莫斯科"',
+                            solution: 'city = "Moscow"', check: c => c.replace(/\s/g, '').includes('city="Moscow"') ||
+                                c.replace(/\s/g, '').includes('city="Москва"') },
+                        { ru: 'Создай переменную height со значением 1.65', en: 'Create variable height with value 1.65',
+                            zh: '创建变量 height 并赋值为 1.65', solution: 'height = 1.65',
+                            check: c => c.replace(/\s/g, '').includes('height=1.65') },
+                        { ru: 'Создай переменную is_student со значением True',
+                            en: 'Create variable is_student with value True', zh: '创建变量 is_student 并赋值为 True',
+                            solution: 'is_student = True', check: c => c.replace(/\s/g, '').includes('is_student=True') },
+                        { ru: 'Создай переменную greeting со значением "Привет, мир!"',
+                            en: 'Create variable greeting with value "Hello, world!"',
+                            zh: '创建变量 greeting 并赋值为 "你好，世界！"', solution: 'greeting = "Hello, world!"',
+                            check: c => c.replace(/\s/g, '').includes('greeting="Hello,world!"') ||
+                                c.replace(/\s/g, '').includes('greeting="Привет,мир!"') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 1: ТИПЫ ДАННЫХ ----
+            {
+                id: 1,
+                title: { ru: 'Типы данных', en: 'Data Types', zh: '数据类型' },
+                theory: {
+                    ru: `У каждой переменной в Python есть тип — это говорит программе, что за значение внутри.
+
+            📌 Основные типы:
+            • str — строка, то есть текст в кавычках: "Привет", "Python", даже "123" в кавычках — это текст!
+            • int — целое число: 42, -5, 0
+            • float — число с точкой: 3.14, -0.5, 2.0
+            • bool — логическое значение: True (правда) или False (ложь)
+
+            💡 Чтобы узнать тип переменной, используй функцию type(): type(age) покажет, что это int.
+
+            🎯 В этом уроке ты научишься создавать переменные разных типов.`,
+                    en: `Every variable in Python has a type — it tells the program what kind of value is inside.
+
+            📌 Main types:
+            • str — string, text in quotes: "Hello", "Python", even "123" in quotes is text!
+            • int — integer: 42, -5, 0
+            • float — decimal number: 3.14, -0.5, 2.0
+            • bool — boolean: True or False
+
+            💡 To find out the type of a variable, use type(): type(age) will show int.
+
+            🎯 In this lesson, you'll learn to create variables of different types.`,
+                    zh: `Python 中的每个变量都有一个类型——它告诉程序里面是什么类型的值。
+
+            📌 主要类型：
+            • str — 字符串，带引号的文本："你好", "Python"，甚至带引号的 "123" 也是文本！
+            • int — 整数：42, -5, 0
+            • float — 浮点数：3.14, -0.5, 2.0
+            • bool — 布尔值：True 或 False
+
+            💡 要查看变量的类型，使用 type()：type(age) 会显示 int。
+
+            🎯 在本课中，你将学习创建不同类型的变量。`
+                },
+                example: {
+                    ru: `# Примеры разных типов
+            name = "Анна"        # str — текст
+            age = 14             # int — целое число
+            height = 1.65        # float — число с точкой
+            is_student = True    # bool — правда/ложь`,
+                    en: `# Examples of different types
+            name = "Anna"        # str — text
+            age = 14             # int — integer
+            height = 1.65        # float — decimal
+            is_student = True    # bool — true/false`,
+                    zh: `# 不同类型的示例
+            name = "安娜"        # str — 文本
+            age = 14             # int — 整数
+            height = 1.65        # float — 浮点数
+            is_student = True    # bool — 布尔值`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Создай переменную age со значением 14 (тип int)', en: 'Create variable age with value 14 (int)',
+                        zh: '创建变量 age 并赋值为 14 (int)', solution: 'age = 14',
+                        check: c => c.replace(/\s/g, '').includes('age=14') },
+                    [
+                        { ru: 'Создай переменную pi со значением 3.14 (тип float)',
+                            en: 'Create variable pi with value 3.14 (float)', zh: '创建变量 pi 并赋值为 3.14 (float)',
+                            solution: 'pi = 3.14', check: c => c.replace(/\s/g, '').includes('pi=3.14') },
+                        { ru: 'Создай переменную name со значением "Python" (тип str)',
+                            en: 'Create variable name with value "Python" (str)', zh: '创建变量 name 并赋值为 "Python" (str)',
+                            solution: 'name = "Python"', check: c => c.replace(/\s/g, '').includes('name="Python"') },
+                        { ru: 'Создай переменную is_fun со значением True (тип bool)',
+                            en: 'Create variable is_fun with value True (bool)', zh: '创建变量 is_fun 并赋值为 True (bool)',
+                            solution: 'is_fun = True', check: c => c.replace(/\s/g, '').includes('is_fun=True') },
+                        { ru: 'Создай переменную temperature со значением -5 (тип int)',
+                            en: 'Create variable temperature with value -5 (int)',
+                            zh: '创建变量 temperature 并赋值为 -5 (int)', solution: 'temperature = -5',
+                            check: c => c.replace(/\s/g, '').includes('temperature=-5') },
+                        { ru: 'Создай переменную price со значением 99.99 (тип float)',
+                            en: 'Create variable price with value 99.99 (float)',
+                            zh: '创建变量 price 并赋值为 99.99 (float)', solution: 'price = 99.99',
+                            check: c => c.replace(/\s/g, '').includes('price=99.99') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 2: УСЛОВИЯ (if) ----
+            {
+                id: 2,
+                title: { ru: 'Условия (if)', en: 'Conditions (if)', zh: '条件 (if)' },
+                theory: {
+                    ru: `Условия помогают программе принимать решения. Это как если бы ты спрашивала: "А правда ли, что...?"
+
+            📌 Записывается так:
+            if условие:
+                действие
+
+            🔥 Важно: после условия ставится двоеточие (:), а код внутри должен быть с отступом (обычно 4 пробела).
+
+            📌 Операторы сравнения (они помогают писать условия):
+            • == — равно
+            • != — не равно
+            • > — больше
+            • < — меньше
+            • >= — больше или равно
+            • <= — меньше или равно
+
+            🎯 В этом уроке ты научишься использовать условия if.`,
+                    en: `Conditions help the program make decisions. It's like asking: "Is it true that...?"
+
+            📌 Written like this:
+            if condition:
+                action
+
+            🔥 Important: after the condition, put a colon (:), and indent the code inside (usually 4 spaces).
+
+            📌 Comparison operators:
+            • == — equal
+            • != — not equal
+            • > — greater than
+            • < — less than
+            • >= — greater than or equal to
+            • <= — less than or equal to
+
+            🎯 In this lesson, you'll learn to use if conditions.`,
+                    zh: `条件帮助程序做出决策。就像你在问："这是真的吗...？"
+
+            📌 写法：
+            if 条件:
+                动作
+
+            🔥 重要：条件后面加冒号 (:)，内部代码需要缩进（通常 4 个空格）。
+
+            📌 比较运算符：
+            • == — 等于
+            • != — 不等于
+            • > — 大于
+            • < — 小于
+            • >= — 大于或等于
+            • <= — 小于或等于
+
+            🎯 在本课中，你将学习使用 if 条件。`
+                },
+                example: {
+                    ru: `# Пример условия
+            x = 10
+            if x > 5:
+                print("x больше пяти")`,
+                    en: `# Example of a condition
+            x = 10
+            if x > 5:
+                print("x is greater than five")`,
+                    zh: `# 条件示例
+            x = 10
+            if x > 5:
+                print("x 大于五")`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Напиши: if x > 5: print("Больше пяти")',
+                        en: 'Write: if x > 5: print("Greater than five")', zh: '写：if x > 5: print("大于五")',
+                        solution: 'if x > 5:\n    print("Greater than five")', check: c => c.replace(/\s/g, '')
+                            .includes('ifx>5:') && (c.replace(/\s/g, '').includes('print("Greaterthanfive")') || c
+                                .replace(/\s/g, '').includes('print("Большепяти")')) },
+                    [
+                        { ru: 'Напиши: if y < 10: print("Меньше десяти")',
+                            en: 'Write: if y < 10: print("Less than ten")', zh: '写：if y < 10: print("小于十")',
+                            solution: 'if y < 10:\n    print("Less than ten")', check: c => c.replace(/\s/g, '')
+                                .includes('ify<10:') && (c.replace(/\s/g, '').includes('print("Lessthanten")') || c
+                                    .replace(/\s/g, '').includes('print("Меньшедесяти")')) },
+                        { ru: 'Напиши: if z == 0: print("Ноль")', en: 'Write: if z == 0: print("Zero")',
+                            zh: '写：if z == 0: print("零")', solution: 'if z == 0:\n    print("Zero")',
+                            check: c => c.replace(/\s/g, '').includes('ifz==0:') && (c.replace(/\s/g, '').includes(
+                                'print("Zero")') || c.replace(/\s/g, '').includes('print("Ноль")')) },
+                        { ru: 'Напиши: if age >= 18: print("Взрослый")', en: 'Write: if age >= 18: print("Adult")',
+                            zh: '写：if age >= 18: print("成年人")', solution: 'if age >= 18:\n    print("Adult")',
+                            check: c => c.replace(/\s/g, '').includes('ifage>=18:') && (c.replace(/\s/g, '').includes(
+                                'print("Adult")') || c.replace(/\s/g, '').includes('print("Взрослый")')) },
+                        { ru: 'Напиши: if temp < 0: print("Мороз")', en: 'Write: if temp < 0: print("Freezing")',
+                            zh: '写：if temp < 0: print("冰冻")', solution: 'if temp < 0:\n    print("Freezing")',
+                            check: c => c.replace(/\s/g, '').includes('iftemp<0:') && (c.replace(/\s/g, '').includes(
+                                'print("Freezing")') || c.replace(/\s/g, '').includes('print("Мороз")')) },
+                        { ru: 'Напиши: if score > 80: print("Отлично")', en: 'Write: if score > 80: print("Excellent")',
+                            zh: '写：if score > 80: print("优秀")', solution: 'if score > 80:\n    print("Excellent")',
+                            check: c => c.replace(/\s/g, '').includes('ifscore>80:') && (c.replace(/\s/g, '').includes(
+                                'print("Excellent")') || c.replace(/\s/g, '').includes('print("Отлично")')) },
+                    ]
+                )
+            },
+
+            // ---- УРОК 3: ЦИКЛЫ (for) ----
+            {
+                id: 3,
+                title: { ru: 'Циклы (for)', en: 'Loops (for)', zh: '循环 (for)' },
+                theory: {
+                    ru: `Циклы нужны, чтобы повторять одно и то же действие несколько раз. Это как если бы ты сказала: "Сделай это 3 раза!"
+
+            📌 Записывается так:
+            for переменная in range(количество):
+                действие
+
+            📌 Функция range(n) создаёт числа от 0 до n-1:
+            • range(3) → числа 0, 1, 2
+            • range(1, 5) → числа 1, 2, 3, 4
+            • range(2, 10, 2) → числа 2, 4, 6, 8 (с шагом 2)
+
+            🔥 Циклы очень полезны, когда нужно сделать что-то много раз!
+
+            🎯 В этом уроке ты научишься использовать циклы for.`,
+                    en: `Loops are used to repeat the same action several times. It's like saying: "Do this 3 times!"
+
+            📌 Written like this:
+            for variable in range(count):
+                action
+
+            📌 range(n) creates numbers from 0 to n-1:
+            • range(3) → numbers 0, 1, 2
+            • range(1, 5) → numbers 1, 2, 3, 4
+            • range(2, 10, 2) → numbers 2, 4, 6, 8 (step 2)
+
+            🔥 Loops are very useful when you need to do something many times!
+
+            🎯 In this lesson, you'll learn to use for loops.`,
+                    zh: `循环用于重复执行同一动作多次。就像你在说："做这个 3 次！"
+
+            📌 写法：
+            for 变量 in range(数量):
+                动作
+
+            📌 range(n) 生成从 0 到 n-1 的数字：
+            • range(3) → 数字 0, 1, 2
+            • range(1, 5) → 数字 1, 2, 3, 4
+            • range(2, 10, 2) → 数字 2, 4, 6, 8（步长 2）
+
+            🔥 当你需要做很多事情时，循环非常有用！
+
+            🎯 在本课中，你将学习使用 for 循环。`
+                },
+                example: {
+                    ru: `# Пример цикла
+            for i in range(3):
+                print(i)  # напечатает 0, 1, 2`,
+                    en: `# Loop example
+            for i in range(3):
+                print(i)  # prints 0, 1, 2`,
+                    zh: `# 循环示例
+            for i in range(3):
+                print(i)  # 打印 0, 1, 2`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Напиши: for i in range(3): print(i)', en: 'Write: for i in range(3): print(i)',
+                        zh: '写：for i in range(3): print(i)', solution: 'for i in range(3):\n    print(i)',
+                        check: c => c.replace(/\s/g, '').includes('foriinrange(3):') && c.replace(/\s/g, '').includes(
+                            'print(i)') },
+                    [
+                        { ru: 'Напиши: for i in range(5): print(i) (от 0 до 4)',
+                            en: 'Write: for i in range(5): print(i) (0 to 4)',
+                            zh: '写：for i in range(5): print(i) (0 到 4)', solution: 'for i in range(5):\n    print(i)',
+                            check: c => c.replace(/\s/g, '').includes('foriinrange(5):') && c.replace(/\s/g, '')
+                                .includes('print(i)') },
+                        { ru: 'Напиши: for x in range(1, 6): print(x) (от 1 до 5)',
+                            en: 'Write: for x in range(1, 6): print(x) (1 to 5)',
+                            zh: '写：for x in range(1, 6): print(x) (1 到 5)', solution: 'for x in range(1, 6):\n    print(x)',
+                            check: c => c.replace(/\s/g, '').includes('forxinrange(1,6):') && c.replace(/\s/g, '')
+                                .includes('print(x)') },
+                        { ru: 'Напиши: for i in range(2, 10, 2): print(i) (чётные 2,4,6,8)',
+                            en: 'Write: for i in range(2, 10, 2): print(i) (even 2,4,6,8)',
+                            zh: '写：for i in range(2, 10, 2): print(i) (偶数 2,4,6,8)',
+                            solution: 'for i in range(2, 10, 2):\n    print(i)', check: c => c.replace(/\s/g, '')
+                                .includes('foriinrange(2,10,2):') && c.replace(/\s/g, '').includes('print(i)') },
+                        { ru: 'Напиши: for n in range(5, 0, -1): print(n) (от 5 до 1)',
+                            en: 'Write: for n in range(5, 0, -1): print(n) (5 to 1)',
+                            zh: '写：for n in range(5, 0, -1): print(n) (5 到 1)',
+                            solution: 'for n in range(5, 0, -1):\n    print(n)', check: c => c.replace(/\s/g, '')
+                                .includes('forninrange(5,0,-1):') && c.replace(/\s/g, '').includes('print(n)') },
+                        { ru: 'Напиши: for fruit in ["apple","banana"]: print(fruit)',
+                            en: 'Write: for fruit in ["apple","banana"]: print(fruit)',
+                            zh: '写：for fruit in ["苹果","香蕉"]: print(fruit)',
+                            solution: 'for fruit in ["apple", "banana"]:\n    print(fruit)', check: c => c.replace(
+                                /\s/g, '').includes('forfruitin["apple","banana"]:') && c.replace(/\s/g, '').includes(
+                                'print(fruit)') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 4: ФУНКЦИИ (def) ----
+            {
+                id: 4,
+                title: { ru: 'Функции (def)', en: 'Functions (def)', zh: '函数 (def)' },
+                theory: {
+                    ru: `Функции — это как маленькие программы внутри программы. Ты можешь написать код один раз, а потом вызывать его сколько угодно раз.
+
+            📌 Записывается так:
+            def имя_функции(параметры):
+                действие
+                return результат
+
+            💡 Функции помогают не повторять один и тот же код много раз.
+
+            🔥 return возвращает значение. Если не написать return, функция просто выполнит действие и ничего не вернёт.
+
+            🎯 В этом уроке ты научишься создавать свои функции.`,
+                    en: `Functions are like little programs inside your program. You can write code once and then call it as many times as you want.
+
+            📌 Written like this:
+            def function_name(parameters):
+                action
+                return result
+
+            💡 Functions help avoid repeating the same code many times.
+
+            🔥 return gives back a value. If you don't write return, the function just does the action and returns nothing.
+
+            🎯 In this lesson, you'll learn to create your own functions.`,
+                    zh: `函数就像程序中的小程序。你可以写一次代码，然后随意调用多少次。
+
+            📌 写法：
+            def 函数名(参数):
+                动作
+                return 结果
+
+            💡 函数帮助避免重复相同的代码。
+
+            🔥 return 返回值。如果不写 return，函数只执行动作，不返回任何值。
+
+            🎯 在本课中，你将学习创建自己的函数。`
+                },
+                example: {
+                    ru: `# Пример функции
+            def hello():
+                print("Привет!")`,
+                    en: `# Function example
+            def hello():
+                print("Hello!")`,
+                    zh: `# 函数示例
+            def hello():
+                print("你好！")`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Создай функцию def hello(): print("Привет!")',
+                        en: 'Create function def hello(): print("Hello!")', zh: '创建函数 def hello(): print("你好！")',
+                        solution: 'def hello():\n    print("Hello!")', check: c => c.replace(/\s/g, '')
+                            .includes('defhello():') && (c.replace(/\s/g, '').includes('print("Hello!")') || c.replace(
+                                /\s/g, '').includes('print("Привет!")')) },
+                    [
+                        { ru: 'Создай функцию def greet(name): print("Привет, " + name)',
+                            en: 'Create function def greet(name): print("Hello, " + name)',
+                            zh: '创建函数 def greet(name): print("你好, " + name)',
+                            solution: 'def greet(name):\n    print("Hello, " + name)', check: c => c.replace(/\s/g, '')
+                                .includes('defgreet(name):') && (c.replace(/\s/g, '').includes('print("Hello,"+name)') ||
+                                    c.replace(/\s/g, '').includes('print("Привет,"+name)')) },
+                        { ru: 'Создай функцию def add(a, b): return a + b',
+                            en: 'Create function def add(a, b): return a + b',
+                            zh: '创建函数 def add(a, b): return a + b', solution: 'def add(a, b):\n    return a + b',
+                            check: c => c.replace(/\s/g, '').includes('defadd(a,b):') && c.replace(/\s/g, '')
+                                .includes('returna+b') },
+                        { ru: 'Создай функцию def square(x): return x * x',
+                            en: 'Create function def square(x): return x * x',
+                            zh: '创建函数 def square(x): return x * x', solution: 'def square(x):\n    return x * x',
+                            check: c => c.replace(/\s/g, '').includes('defsquare(x):') && c.replace(/\s/g, '')
+                                .includes('returnx*x') },
+                        { ru: 'Создай функцию def is_even(n): return n % 2 == 0',
+                            en: 'Create function def is_even(n): return n % 2 == 0',
+                            zh: '创建函数 def is_even(n): return n % 2 == 0',
+                            solution: 'def is_even(n):\n    return n % 2 == 0', check: c => c.replace(/\s/g, '')
+                                .includes('defis_even(n):') && c.replace(/\s/g, '').includes('returnn%2==0') },
+                        { ru: 'Создай функцию def multiply(a, b): return a * b',
+                            en: 'Create function def multiply(a, b): return a * b',
+                            zh: '创建函数 def multiply(a, b): return a * b',
+                            solution: 'def multiply(a, b):\n    return a * b', check: c => c.replace(/\s/g, '')
+                                .includes('defmultiply(a,b):') && c.replace(/\s/g, '').includes('returna*b') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 5: СПИСКИ (list) ----
+            {
+                id: 5,
+                title: { ru: 'Списки (list)', en: 'Lists', zh: '列表 (list)' },
+                theory: {
+                    ru: `Списки — это коллекции элементов. Они хранят несколько значений в одной переменной.
+
+            📌 Записывается так: список = [элемент1, элемент2, элемент3]
+
+            💡 Элементы списка могут быть разных типов (числа, текст, даже другие списки!).
+
+            📌 Доступ к элементу по индексу: список[0] — это первый элемент, список[-1] — последний.
+
+            🔥 Индексы начинаются с 0! len(список) показывает длину списка.
+
+            🎯 В этом уроке ты научишься работать со списками.`,
+                    en: `Lists are collections of elements. They store multiple values in one variable.
+
+            📌 Written like this: list = [element1, element2, element3]
+
+            💡 List elements can be of different types (numbers, text, even other lists!).
+
+            📌 Access by index: list[0] — first element, list[-1] — last element.
+
+            🔥 Indexes start from 0! len(list) shows the length of the list.
+
+            🎯 In this lesson, you'll learn to work with lists.`,
+                    zh: `列表是元素的集合。它们在一个变量中存储多个值。
+
+            📌 写法：列表 = [元素1, 元素2, 元素3]
+
+            💡 列表元素可以是不同的类型（数字、文本，甚至其他列表！）。
+
+            📌 通过索引访问：列表[0] — 第一个元素，列表[-1] — 最后一个元素。
+
+            🔥 索引从 0 开始！len(列表) 显示列表的长度。
+
+            🎯 在本课中，你将学习使用列表。`
+                },
+                example: {
+                    ru: `# Пример списка
+            fruits = ["яблоко", "банан", "апельсин"]
+            print(fruits[0])  # яблоко
+            print(len(fruits))  # 3`,
+                    en: `# List example
+            fruits = ["apple", "banana", "orange"]
+            print(fruits[0])  # apple
+            print(len(fruits))  # 3`,
+                    zh: `# 列表示例
+            fruits = ["苹果", "香蕉", "橙子"]
+            print(fruits[0])  # 苹果
+            print(len(fruits))  # 3`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Создай список fruits с элементами "яблоко", "банан"',
+                        en: 'Create list fruits with items "apple", "banana"',
+                        zh: '创建列表 fruits 包含 "苹果", "香蕉"', solution: 'fruits = ["apple", "banana"]',
+                        check: c => c.replace(/\s/g, '').includes('fruits=["apple","banana"]') || c.replace(/\s/g, '')
+                            .includes('fruits=["яблоко","банан"]') },
+                    [
+                        { ru: 'Создай список numbers с числами 1, 2, 3', en: 'Create list numbers with 1, 2, 3',
+                            zh: '创建列表 numbers 包含 1, 2, 3', solution: 'numbers = [1, 2, 3]',
+                            check: c => c.replace(/\s/g, '').includes('numbers=[1,2,3]') },
+                        { ru: 'Создай список mixed с разными типами: 1, "text", True',
+                            en: 'Create list mixed with different types: 1, "text", True',
+                            zh: '创建列表 mixed 包含不同类型的值：1, "text", True',
+                            solution: 'mixed = [1, "text", True]', check: c => c.replace(/\s/g, '').includes(
+                                'mixed=[1,"text",True]') },
+                        { ru: 'Создай переменную first равную первому элементу списка fruits',
+                            en: 'Create variable first equal to first element of fruits',
+                            zh: '创建变量 first 等于 fruits 的第一个元素', solution: 'first = fruits[0]',
+                            check: c => c.replace(/\s/g, '').includes('first=fruits[0]') },
+                        { ru: 'Создай переменную last равную последнему элементу списка fruits',
+                            en: 'Create variable last equal to last element of fruits',
+                            zh: '创建变量 last 等于 fruits 的最后一个元素', solution: 'last = fruits[-1]',
+                            check: c => c.replace(/\s/g, '').includes('last=fruits[-1]') },
+                        { ru: 'Создай список colors с тремя любыми цветами',
+                            en: 'Create list colors with any three colors', zh: '创建列表 colors 包含三种任意颜色',
+                            solution: 'colors = ["red", "blue", "green"]',
+                            check: c => c.replace(/\s/g, '').includes('colors=[') && c.replace(/\s/g, '').includes(']') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 6: СЛОВАРИ (dict) ----
+            {
+                id: 6,
+                title: { ru: 'Словари (dict)', en: 'Dictionaries', zh: '字典 (dict)' },
+                theory: {
+                    ru: `Словари хранят пары "ключ → значение". Это как телефонная книга: ты ищешь по имени (ключ) и получаешь номер телефона (значение).
+
+            📌 Записывается так: словарь = {"ключ1": значение1, "ключ2": значение2}
+
+            💡 Ключи обычно строки (текст), значения могут быть любыми.
+
+            📌 Доступ по ключу: словарь["ключ"]
+
+            🔥 Словари очень полезны для структурированных данных (например, информация о человеке).
+
+            🎯 В этом уроке ты научишься создавать словари.`,
+                    en: `Dictionaries store key → value pairs. It's like a phone book: you search by name (key) and get a phone number (value).
+
+            📌 Written like this: dict = {"key1": value1, "key2": value2}
+
+            💡 Keys are usually strings (text), values can be anything.
+
+            📌 Access by key: dict["key"]
+
+            🔥 Dictionaries are great for structured data (like information about a person).
+
+            🎯 In this lesson, you'll learn to create dictionaries.`,
+                    zh: `字典存储键 → 值对。就像电话簿：你按名字（键）搜索，得到电话号码（值）。
+
+            📌 写法：字典 = {"键1": 值1, "键2": 值2}
+
+            💡 键通常是字符串（文本），值可以是任何类型。
+
+            📌 通过键访问：字典["键"]
+
+            🔥 字典非常适合结构化数据（如个人信息）。
+
+            🎯 在本课中，你将学习创建字典。`
+                },
+                example: {
+                    ru: `# Пример словаря
+            person = {"name": "Анна", "age": 14, "city": "Москва"}
+            print(person["name"])  # Анна`,
+                    en: `# Dictionary example
+            person = {"name": "Anna", "age": 14, "city": "Moscow"}
+            print(person["name"])  # Anna`,
+                    zh: `# 字典示例
+            person = {"name": "安娜", "age": 14, "city": "莫斯科"}
+            print(person["name"])  # 安娜`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Создай словарь person с ключами "name", "age" и любыми значениями',
+                        en: 'Create dict person with keys "name", "age" and any values',
+                        zh: '创建字典 person 包含键 "name", "age" 并赋任意值',
+                        solution: 'person = {"name": "Anna", "age": 14}', check: c => c.replace(/\s/g, '')
+                            .includes('person={"name":') && c.replace(/\s/g, '').includes('"age":') },
+                    [
+                        { ru: 'Создай словарь book с ключами "title", "author"',
+                            en: 'Create dict book with keys "title", "author"',
+                            zh: '创建字典 book 包含键 "title", "author"',
+                            solution: 'book = {"title": "Python", "author": "Guido"}', check: c => c.replace(/\s/g, '')
+                                .includes('book={"title":') && c.replace(/\s/g, '').includes('"author":') },
+                        { ru: 'Создай переменную name равную значению по ключу "name" из словаря person',
+                            en: 'Create variable name equal to value by key "name" from person',
+                            zh: '创建变量 name 等于字典 person 中键 "name" 的值', solution: 'name = person["name"]',
+                            check: c => c.replace(/\s/g, '').includes('name=person["name"]') },
+                        { ru: 'Создай словарь car с ключами "brand", "year"',
+                            en: 'Create dict car with keys "brand", "year"', zh: '创建字典 car 包含键 "brand", "year"',
+                            solution: 'car = {"brand": "Tesla", "year": 2023}', check: c => c.replace(/\s/g, '')
+                                .includes('car={"brand":') && c.replace(/\s/g, '').includes('"year":') },
+                        { ru: 'Создай словарь student с ключами "name", "grade"',
+                            en: 'Create dict student with keys "name", "grade"',
+                            zh: '创建字典 student 包含键 "name", "grade"', solution: 'student = {"name": "Alice", "grade": 5}',
+                            check: c => c.replace(/\s/g, '').includes('student={"name":') && c.replace(/\s/g, '')
+                                .includes('"grade":') },
+                        { ru: 'Создай переменную age из словаря person по ключу "age"',
+                            en: 'Create variable age from person by key "age"',
+                            zh: '从字典 person 中按键 "age" 创建变量 age', solution: 'age = person["age"]',
+                            check: c => c.replace(/\s/g, '').includes('age=person["age"]') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 7: ЦИКЛЫ while ----
+            {
+                id: 7,
+                title: { ru: 'Циклы while', en: 'While Loops', zh: 'While 循环' },
+                theory: {
+                    ru: `Цикл while повторяется, пока условие истинно. Он не знает, сколько раз нужно повторить — он просто проверяет: "Всё ещё правда? Тогда делай ещё раз!"
+
+            📌 Записывается так:
+            while условие:
+                действие
+
+            🔥 Важно: убедись, что условие когда-нибудь станет ложным, иначе цикл будет крутиться вечно!
+
+            💡 while полезен, когда ты не знаешь заранее, сколько раз нужно повторить.
+
+            🎯 В этом уроке ты научишься использовать циклы while.`,
+                    en: `The while loop repeats while the condition is true. It doesn't know how many times to repeat — it just checks: "Still true? Then do it again!"
+
+            📌 Written like this:
+            while condition:
+                action
+
+            🔥 Important: make sure the condition becomes false eventually, otherwise the loop will run forever!
+
+            💡 while is useful when you don't know in advance how many times to repeat.
+
+            🎯 In this lesson, you'll learn to use while loops.`,
+                    zh: `while 循环在条件为真时重复执行。它不知道要重复多少次——它只是检查："仍然为真？那就再做一次！"
+
+            📌 写法：
+            while 条件:
+                动作
+
+            🔥 重要：确保条件最终会变为假，否则循环将永远运行！
+
+            💡 当你不知道需要重复多少次时，while 很有用。
+
+            🎯 在本课中，你将学习使用 while 循环。`
+                },
+                example: {
+                    ru: `# Пример while
+            i = 0
+            while i < 3:
+                print(i)
+                i = i + 1  # увеличиваем i на 1`,
+                    en: `# While example
+            i = 0
+            while i < 3:
+                print(i)
+                i = i + 1  # increment i by 1`,
+                    zh: `# while 示例
+            i = 0
+            while i < 3:
+                print(i)
+                i = i + 1  # i 增加 1`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Напиши: i = 0; while i < 3: print(i); i = i + 1',
+                        en: 'Write: i = 0; while i < 3: print(i); i = i + 1',
+                        zh: '写：i = 0; while i < 3: print(i); i = i + 1',
+                        solution: 'i = 0\nwhile i < 3:\n    print(i)\n    i = i + 1', check: c => c.replace(/\s/g, '')
+                            .includes('whilei<3:') && c.replace(/\s/g, '').includes('print(i)') && c.replace(/\s/g, '')
+                            .includes('i=i+1') },
+                    [
+                        { ru: 'Напиши: i = 5; while i > 0: print(i); i = i - 1 (от 5 до 1)',
+                            en: 'Write: i = 5; while i > 0: print(i); i = i - 1 (5 to 1)',
+                            zh: '写：i = 5; while i > 0: print(i); i = i - 1 (5 到 1)',
+                            solution: 'i = 5\nwhile i > 0:\n    print(i)\n    i = i - 1', check: c => c.replace(/\s/g, '')
+                                .includes('whilei>0:') && c.replace(/\s/g, '').includes('print(i)') && c.replace(/\s/g,
+                                    '').includes('i=i-1') },
+                        { ru: 'Напиши: i = 0; while i < 5: i = i + 1',
+                            en: 'Write: i = 0; while i < 5: i = i + 1',
+                            zh: '写：i = 0; while i < 5: i = i + 1', solution: 'i = 0\nwhile i < 5:\n    i = i + 1',
+                            check: c => c.replace(/\s/g, '').includes('whilei<5:') && c.replace(/\s/g, '').includes(
+                                'i=i+1') },
+                        { ru: 'Напиши: i = 10; while i > 0: i = i - 2 (от 10 до 0 с шагом 2)',
+                            en: 'Write: i = 10; while i > 0: i = i - 2 (10 to 0 step 2)',
+                            zh: '写：i = 10; while i > 0: i = i - 2 (10 到 0 步长 2)',
+                            solution: 'i = 10\nwhile i > 0:\n    i = i - 2', check: c => c.replace(/\s/g, '')
+                                .includes('whilei>0:') && c.replace(/\s/g, '').includes('i=i-2') },
+                        { ru: 'Напиши: i = 1; while i <= 3: print(i); i = i + 1',
+                            en: 'Write: i = 1; while i <= 3: print(i); i = i + 1',
+                            zh: '写：i = 1; while i <= 3: print(i); i = i + 1',
+                            solution: 'i = 1\nwhile i <= 3:\n    print(i)\n    i = i + 1', check: c => c.replace(/\s/g, '')
+                                .includes('whilei<=3:') && c.replace(/\s/g, '').includes('print(i)') && c.replace(/\s/g,
+                                    '').includes('i=i+1') },
+                        { ru: 'Напиши: i = 0; while i < 4: i = i + 1; print(i) (напечатает 1,2,3,4)',
+                            en: 'Write: i = 0; while i < 4: i = i + 1; print(i) (prints 1,2,3,4)',
+                            zh: '写：i = 0; while i < 4: i = i + 1; print(i) (打印 1,2,3,4)',
+                            solution: 'i = 0\nwhile i < 4:\n    i = i + 1\n    print(i)', check: c => c.replace(/\s/g, '')
+                                .includes('whilei<4:') && c.replace(/\s/g, '').includes('i=i+1') && c.replace(/\s/g, '')
+                                .includes('print(i)') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 8: СТРОКИ (str) ----
+            {
+                id: 8,
+                title: { ru: 'Строки (str)', en: 'Strings', zh: '字符串 (str)' },
+                theory: {
+                    ru: `Строки — это текст в кавычках. Это один из самых важных типов данных.
+
+            📌 Записывается так: "текст" или 'текст'
+
+            💡 Строки можно складывать: "Привет, " + "мир!" → "Привет, мир!"
+
+            📌 Полезные методы строк:
+            • len("текст") — длина строки
+            • "текст".upper() — все буквы большие (ПРИВЕТ)
+            • "ТЕКСТ".lower() — все буквы маленькие (текст)
+            • "текст".replace("е", "а") — заменить буквы
+
+            🎯 В этом уроке ты научишься работать со строками.`,
+                    en: `Strings are text in quotes. They are one of the most important data types.
+
+            📌 Written like this: "text" or 'text'
+
+            💡 Strings can be concatenated: "Hello, " + "world!" → "Hello, world!"
+
+            📌 Useful string methods:
+            • len("text") — length of the string
+            • "text".upper() — all uppercase (TEXT)
+            • "TEXT".lower() — all lowercase (text)
+            • "text".replace("e", "a") — replace characters
+
+            🎯 In this lesson, you'll learn to work with strings.`,
+                    zh: `字符串是带引号的文本。它们是最重要的数据类型之一。
+
+            📌 写法："文本" 或 '文本'
+
+            💡 字符串可以拼接："你好, " + "世界！" → "你好, 世界！"
+
+            📌 有用的字符串方法：
+            • len("文本") — 字符串长度
+            • "文本".upper() — 全部大写 (TEXT)
+            • "TEXT".lower() — 全部小写 (text)
+            • "text".replace("e", "a") — 替换字符
+
+            🎯 在本课中，你将学习使用字符串。`
+                },
+                example: {
+                    ru: `# Примеры строк
+            name = "Анна"
+            greeting = "Привет, " + name
+            print(greeting)  # Привет, Анна
+            print(len(name))  # 4`,
+                    en: `# String examples
+            name = "Anna"
+            greeting = "Hello, " + name
+            print(greeting)  # Hello, Anna
+            print(len(name))  # 4`,
+                    zh: `# 字符串示例
+            name = "安娜"
+            greeting = "你好, " + name
+            print(greeting)  # 你好, 安娜
+            print(len(name))  # 4`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Создай переменную text со значением "Python"', en: 'Create variable text with value "Python"',
+                        zh: '创建变量 text 并赋值为 "Python"', solution: 'text = "Python"',
+                        check: c => c.replace(/\s/g, '').includes('text="Python"') },
+                    [
+                        { ru: 'Создай переменную greeting как "Hello, " + "world"',
+                            en: 'Create variable greeting as "Hello, " + "world"',
+                            zh: '创建变量 greeting 为 "Hello, " + "world"', solution: 'greeting = "Hello, " + "world"',
+                            check: c => c.replace(/\s/g, '').includes('greeting="Hello,"+"world"') },
+                        { ru: 'Создай переменную length равную длине строки "Python"',
+                            en: 'Create variable length equal to length of "Python"',
+                            zh: '创建变量 length 等于 "Python" 的长度', solution: 'length = len("Python")',
+                            check: c => c.replace(/\s/g, '').includes('length=len("Python")') },
+                        { ru: 'Создай переменную upper_text из "hello" в верхнем регистре',
+                            en: 'Create variable upper_text from "hello" in uppercase',
+                            zh: '创建变量 upper_text 为 "hello" 的大写形式', solution: 'upper_text = "hello".upper()',
+                            check: c => c.replace(/\s/g, '').includes('upper_text="hello".upper()') },
+                        { ru: 'Создай переменную lower_text из "PYTHON" в нижнем регистре',
+                            en: 'Create variable lower_text from "PYTHON" in lowercase',
+                            zh: '创建变量 lower_text 为 "PYTHON" 的小写形式', solution: 'lower_text = "PYTHON".lower()',
+                            check: c => c.replace(/\s/g, '').includes('lower_text="PYTHON".lower()') },
+                        { ru: 'Создай переменную replaced заменив в "Hello" "e" на "a"',
+                            en: 'Create variable replaced replacing "e" with "a" in "Hello"',
+                            zh: '创建变量 replaced 将 "Hello" 中的 "e" 替换为 "a"',
+                            solution: 'replaced = "Hello".replace("e", "a")', check: c => c.replace(/\s/g, '')
+                                .includes('replaced="Hello".replace("e","a")') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 9: АЛГОРИТМЫ И ПРАКТИКА ----
+            {
+                id: 9,
+                title: { ru: 'Алгоритмы и практика', en: 'Algorithms & Practice', zh: '算法与实践' },
+                theory: {
+                    ru: `Поздравляю! Ты прошел(а) все основы Python. Теперь время для практики!
+
+            🎯 В этом уроке ты применишь все знания на практике.
+
+            📌 Вспомним:
+            • переменные и типы данных
+            • условия if/else
+            • циклы for и while
+            • функции def
+            • списки и словари
+
+            🔥 Решай задачи и покажи, чему ты научился(ась)!`,
+                    en: `Congratulations! You've covered all Python basics. Now it's time for practice!
+
+            🎯 In this lesson, you'll apply all your knowledge.
+
+            📌 Let's review:
+            • variables and data types
+            • if/else conditions
+            • for and while loops
+            • def functions
+            • lists and dictionaries
+
+            🔥 Solve the tasks and show what you've learned!`,
+                    zh: `恭喜！你已经学完了 Python 基础知识。现在到了练习时间！
+
+            🎯 在本课中，你将应用所有知识。
+
+            📌 复习：
+            • 变量和数据类型
+            • if/else 条件
+            • for 和 while 循环
+            • def 函数
+            • 列表和字典
+
+            🔥 解决问题，展示你学到的东西！`
+                },
+                example: {
+                    ru: `# Пример решения
+            def sum_numbers(a, b):
+                return a + b
+
+            result = sum_numbers(3, 5)
+            print(result)  # 8`,
+                    en: `# Example solution
+            def sum_numbers(a, b):
+                return a + b
+
+            result = sum_numbers(3, 5)
+            print(result)  # 8`,
+                    zh: `# 示例解法
+            def sum_numbers(a, b):
+                return a + b
+
+            result = sum_numbers(3, 5)
+            print(result)  # 8`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Напиши функцию sum_numbers(a, b), которая возвращает a + b',
+                        en: 'Write function sum_numbers(a, b) returning a + b',
+                        zh: '写函数 sum_numbers(a, b) 返回 a + b', solution: 'def sum_numbers(a, b):\n    return a + b',
+                        check: c => c.replace(/\s/g, '').includes('defsum_numbers(a,b):') && c.replace(/\s/g, '')
+                            .includes('returna+b') },
+                    [
+                        { ru: 'Создай список numbers от 1 до 5 и переменную total равную сумме всех элементов',
+                            en: 'Create list numbers 1 to 5 and variable total equal to the sum of all elements',
+                            zh: '创建列表 numbers 1 到 5，并创建变量 total 等于所有元素之和',
+                            solution: 'numbers = [1, 2, 3, 4, 5]\ntotal = sum(numbers)', check: c => c.replace(/\s/g, '')
+                                .includes('numbers=[1,2,3,4,5]') && c.replace(/\s/g, '').includes('total=sum(numbers)') },
+                        { ru: 'Создай цикл, который печатает все чётные числа от 2 до 10',
+                            en: 'Create a loop that prints all even numbers from 2 to 10',
+                            zh: '创建循环打印从 2 到 10 的所有偶数',
+                            solution: 'for i in range(2, 11, 2):\n    print(i)', check: c => c.replace(/\s/g, '')
+                                .includes('foriinrange(2,11,2):') && c.replace(/\s/g, '').includes('print(i)') },
+                        { ru: 'Создай функцию is_positive(n), возвращающую True если n > 0',
+                            en: 'Create function is_positive(n) returning True if n > 0',
+                            zh: '创建函数 is_positive(n)，如果 n > 0 返回 True',
+                            solution: 'def is_positive(n):\n    return n > 0', check: c => c.replace(/\s/g, '')
+                                .includes('defis_positive(n):') && c.replace(/\s/g, '').includes('returnn>0') },
+                        { ru: 'Создай словарь student с ключами "name", "age", "grade"',
+                            en: 'Create dict student with keys "name", "age", "grade"',
+                            zh: '创建字典 student 包含键 "name", "age", "grade"',
+                            solution: 'student = {"name": "Anna", "age": 14, "grade": 5}', check: c => c.replace(/\s/g, '')
+                                .includes('student={"name":') && c.replace(/\s/g, '').includes('"age":') && c.replace(
+                                    /\s/g, '').includes('"grade":') },
+                        { ru: 'Напиши цикл while, который печатает числа от 5 до 1 (обратный отсчёт)',
+                            en: 'Write a while loop that prints numbers from 5 to 1 (countdown)',
+                            zh: '写一个 while 循环打印从 5 到 1 的数字（倒计时）',
+                            solution: 'i = 5\nwhile i > 0:\n    print(i)\n    i = i - 1', check: c => c.replace(/\s/g, '')
+                                .includes('whilei>0:') && c.replace(/\s/g, '').includes('print(i)') && c.replace(/\s/g,
+                                    '').includes('i=i-1') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 10: МНОЖЕСТВА (set) ----
+            {
+                id: 10,
+                title: { ru: 'Множества (set)', en: 'Sets', zh: '集合 (set)' },
+                theory: {
+                    ru: `Множество — это как список, но без повторяющихся элементов. Если ты добавишь одно и то же значение несколько раз, оно сохранится только один раз.
+
+            📌 Создаётся множество так: множество = {элемент1, элемент2, элемент3}
+
+            📌 Основные операции:
+            • union (объединение) — все элементы из двух множеств: a | b
+            • intersection (пересечение) — элементы, которые есть в обоих: a & b
+            • difference (разность) — элементы из первого, которых нет во втором: a - b
+
+            🎯 В этом уроке ты научишься работать с множествами.`,
+                    en: `A set is like a list, but without duplicates. If you add the same value multiple times, it's stored only once.
+
+            📌 Created like this: set = {element1, element2, element3}
+
+            📌 Main operations:
+            • union — all elements from both sets: a | b
+            • intersection — elements in both sets: a & b
+            • difference — elements in first but not in second: a - b
+
+            🎯 In this lesson, you'll learn to work with sets.`,
+                    zh: `集合就像列表，但没有重复元素。如果你多次添加相同的值，它只会存储一次。
+
+            📌 创建方式：集合 = {元素1, 元素2, 元素3}
+
+            📌 主要操作：
+            • union（并集）— 两个集合中的所有元素：a | b
+            • intersection（交集）— 两个集合中都有的元素：a & b
+            • difference（差集）— 在第一个集合中但不在第二个集合中的元素：a - b
+
+            🎯 在本课中，你将学习使用集合。`
+                },
+                example: {
+                    ru: `# Пример множества
+            fruits = {"яблоко", "банан", "апельсин"}`,
+                    en: `# Set example
+            fruits = {"apple", "banana", "orange"}`,
+                    zh: `# 列表示例
+            fruits = {"苹果", "香蕉", "橙子"}`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Создай множество fruits с элементами "яблоко", "банан"',
+                        en: 'Create a set fruits with items "apple", "banana"',
+                        zh: '创建集合 fruits 包含 "苹果", "香蕉"', solution: 'fruits = {"apple", "banana"}',
+                        check: c => c.replace(/\s/g, '').includes('fruits={"apple","banana"}') || c.replace(/\s/g, '')
+                            .includes('fruits={"яблоко","банан"}') },
+                    [
+                        { ru: 'Создай множество numbers с числами 1, 2, 3', en: 'Create a set numbers with 1, 2, 3',
+                            zh: '创建集合 numbers 包含 1, 2, 3', solution: 'numbers = {1, 2, 3}',
+                            check: c => c.replace(/\s/g, '').includes('numbers={1,2,3}') },
+                        { ru: 'Создай множество с повторяющимися элементами и посмотри, что останется',
+                            en: 'Create a set with duplicate elements and see what remains',
+                            zh: '创建包含重复元素的集合，看看剩下什么', solution: 's = {1, 2, 2, 3}',
+                            check: c => c.replace(/\s/g, '').includes('s={1,2,2,3}') },
+                        { ru: 'Найди объединение двух множеств: a | b', en: 'Find the union of two sets: a | b',
+                            zh: '求两个集合的并集：a | b', solution: 'a = {1, 2, 3}\nb = {3, 4, 5}\nresult = a | b',
+                            check: c => c.replace(/\s/g, '').includes('a={1,2,3}') && c.replace(/\s/g, '').includes(
+                                'b={3,4,5}') && c.replace(/\s/g, '').includes('result=a|b') },
+                        { ru: 'Найди пересечение двух множеств: a & b', en: 'Find the intersection of two sets: a & b',
+                            zh: '求两个集合的交集：a & b', solution: 'a = {1, 2, 3}\nb = {3, 4, 5}\nresult = a & b',
+                            check: c => c.replace(/\s/g, '').includes('a={1,2,3}') && c.replace(/\s/g, '').includes(
+                                'b={3,4,5}') && c.replace(/\s/g, '').includes('result=a&b') },
+                        { ru: 'Найди разность двух множеств: a - b', en: 'Find the difference of two sets: a - b',
+                            zh: '求两个集合的差集：a - b', solution: 'a = {1, 2, 3}\nb = {3, 4, 5}\nresult = a - b',
+                            check: c => c.replace(/\s/g, '').includes('a={1,2,3}') && c.replace(/\s/g, '').includes(
+                                'b={3,4,5}') && c.replace(/\s/g, '').includes('result=a-b') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 11: КОРТЕЖИ (tuple) ----
+            {
+                id: 11,
+                title: { ru: 'Кортежи (tuple)', en: 'Tuples', zh: '元组 (tuple)' },
+                theory: {
+                    ru: `Кортеж — это как список, но неизменяемый. Ты не можешь изменить, добавить или удалить элементы после создания.
+
+            📌 Создаётся кортеж так: кортеж = (элемент1, элемент2, элемент3)
+
+            💡 Зачем нужны кортежи?
+            • Чтобы защитить данные от случайных изменений.
+            • Они работают быстрее, чем списки.
+            • Их можно использовать как ключи в словарях.
+
+            🎯 В этом уроке ты научишься создавать кортежи.`,
+                    en: `A tuple is like a list, but immutable. You cannot change, add, or remove elements after creation.
+
+            📌 Created like this: tuple = (element1, element2, element3)
+
+            💡 Why use tuples?
+            • To protect data from accidental changes.
+            • They are faster than lists.
+            • They can be used as keys in dictionaries.
+
+            🎯 In this lesson, you'll learn to create tuples.`,
+                    zh: `元组就像列表，但不可变。创建后不能更改、添加或删除元素。
+
+            📌 创建方式：元组 = (元素1, 元素2, 元素3)
+
+            💡 为什么要使用元组？
+            • 保护数据免受意外更改。
+            • 它们比列表更快。
+            • 它们可以用作字典中的键。
+
+            🎯 在本课中，你将学习创建元组。`
+                },
+                example: {
+                    ru: `# Пример кортежа
+            coordinates = (10, 20)  # координаты (x, y)
+            print(coordinates[0])  # 10`,
+                    en: `# Tuple example
+            coordinates = (10, 20)  # coordinates (x, y)
+            print(coordinates[0])  # 10`,
+                    zh: `# 元组示例
+            coordinates = (10, 20)  # 坐标 (x, y)
+            print(coordinates[0])  # 10`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Создай кортеж coordinates с элементами (10, 20)',
+                        en: 'Create a tuple coordinates with elements (10, 20)',
+                        zh: '创建元组 coordinates 包含 (10, 20)', solution: 'coordinates = (10, 20)',
+                        check: c => c.replace(/\s/g, '').includes('coordinates=(10,20)') },
+                    [
+                        { ru: 'Создай кортеж colors с элементами ("red", "green", "blue")',
+                            en: 'Create a tuple colors with elements ("red", "green", "blue")',
+                            zh: '创建元组 colors 包含 ("red", "green", "blue")',
+                            solution: 'colors = ("red", "green", "blue")', check: c => c.replace(/\s/g, '')
+                                .includes('colors=("red","green","blue")') },
+                        { ru: 'Создай кортеж из одного элемента (не забудь запятую!)',
+                            en: 'Create a tuple with one element (don\'t forget the comma!)',
+                            zh: '创建只有一个元素的元组（别忘了逗号！）', solution: 'single = (5,)',
+                            check: c => c.replace(/\s/g, '').includes('single=(5,)') },
+                        { ru: 'Создай кортеж из смешанных типов: (1, "text", True)',
+                            en: 'Create a tuple with mixed types: (1, "text", True)',
+                            zh: '创建包含混合类型的元组：(1, "text", True)',
+                            solution: 'mixed = (1, "text", True)', check: c => c.replace(/\s/g, '').includes(
+                                'mixed=(1,"text",True)') },
+                        { ru: 'Попробуй изменить элемент кортежа — получи ошибку!',
+                            en: 'Try to change a tuple element — you\'ll get an error!',
+                            zh: '尝试更改元组元素——你会得到错误！', solution: '# tuples are immutable',
+                            check: c => c.trim().length > 5 },
+                    ]
+                )
+            },
+
+            // ---- УРОК 12: РАБОТА С ФАЙЛАМИ ----
+            {
+                id: 12,
+                title: { ru: 'Работа с файлами', en: 'File Handling', zh: '文件操作' },
+                theory: {
+                    ru: `Иногда нужно сохранить данные на компьютер, чтобы они не исчезли после закрытия программы. Для этого мы работаем с файлами.
+
+            📌 Как открыть файл:
+            file = open("file.txt", "r")  # "r" — чтение
+            file = open("file.txt", "w")  # "w" — запись (перезаписывает)
+            file = open("file.txt", "a")  # "a" — добавление в конец
+
+            📌 Как прочитать файл:
+            file = open("file.txt", "r")
+            content = file.read()
+            print(content)
+            file.close()  # важно закрыть файл!
+
+            💡 Удобный способ (с автоматическим закрытием):
+            with open("file.txt", "r") as file:
+                content = file.read()
+                print(content)
+
+            🎯 В этом уроке ты научишься читать и записывать файлы.`,
+                    en: `Sometimes you need to save data to your computer so it doesn't disappear after closing the program. This is why we work with files.
+
+            📌 How to open a file:
+            file = open("file.txt", "r")  # "r" — read
+            file = open("file.txt", "w")  # "w" — write (overwrites)
+            file = open("file.txt", "a")  # "a" — append
+
+            📌 How to read a file:
+            file = open("file.txt", "r")
+            content = file.read()
+            print(content)
+            file.close()  # important to close the file!
+
+            💡 Convenient way (auto-closing):
+            with open("file.txt", "r") as file:
+                content = file.read()
+                print(content)
+
+            🎯 In this lesson, you'll learn to read and write files.`,
+                    zh: `有时你需要将数据保存到计算机上，这样在关闭程序后数据不会消失。这就是我们处理文件的原因。
+
+            📌 如何打开文件：
+            file = open("file.txt", "r")  # "r" — 读取
+            file = open("file.txt", "w")  # "w" — 写入（覆盖）
+            file = open("file.txt", "a")  # "a" — 追加
+
+            📌 如何读取文件：
+            file = open("file.txt", "r")
+            content = file.read()
+            print(content)
+            file.close()  # 记得关闭文件！
+
+            💡 更方便的方式（自动关闭）：
+            with open("file.txt", "r") as file:
+                content = file.read()
+                print(content)
+
+            🎯 在本课中，你将学习读取和写入文件。`
+                },
+                example: {
+                    ru: `# Пример записи в файл
+            with open("hello.txt", "w") as file:
+                file.write("Привет, мир!")`,
+                    en: `# Example of writing to a file
+            with open("hello.txt", "w") as file:
+                file.write("Hello, world!")`,
+                    zh: `# 写入文件示例
+            with open("hello.txt", "w") as file:
+                file.write("你好，世界！")`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Напиши программу, которая записывает "Hello, world!" в файл',
+                        en: 'Write a program that writes "Hello, world!" to a file',
+                        zh: '写程序将 "你好，世界！" 写入文件',
+                        solution: 'with open("hello.txt", "w") as file:\n    file.write("Hello, world!")',
+                        check: c => c.replace(/\s/g, '').includes('withopen("hello.txt","w")') && c.replace(/\s/g, '')
+                            .includes('file.write("Hello,world!")') },
+                    [
+                        { ru: 'Напиши программу, которая читает файл и печатает его содержимое',
+                            en: 'Write a program that reads a file and prints its contents',
+                            zh: '写程序读取文件并打印其内容',
+                            solution: 'with open("hello.txt", "r") as file:\n    print(file.read())',
+                            check: c => c.replace(/\s/g, '').includes('withopen("hello.txt","r")') && c.replace(/\s/g, '')
+                                .includes('print(file.read())') },
+                        { ru: 'Напиши программу, которая добавляет строку в конец файла',
+                            en: 'Write a program that appends a line to a file',
+                            zh: '写程序在文件末尾添加一行',
+                            solution: 'with open("hello.txt", "a") as file:\n    file.write("New line!")',
+                            check: c => c.replace(/\s/g, '').includes('withopen("hello.txt","a")') && c.replace(/\s/g, '')
+                                .includes('file.write("Newline!")') },
+                        { ru: 'Напиши программу, которая создаёт файл с твоим именем и возрастом',
+                            en: 'Write a program that creates a file with your name and age',
+                            zh: '写程序创建包含你的姓名和年龄的文件',
+                            solution: 'with open("info.txt", "w") as file:\n    file.write("Anna, 14")',
+                            check: c => c.replace(/\s/g, '').includes('withopen("info.txt","w")') && c.replace(/\s/g, '')
+                                .includes('file.write') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 13: ОБРАБОТКА ОШИБОК ----
+            {
+                id: 13,
+                title: { ru: 'Обработка ошибок', en: 'Error Handling', zh: '错误处理' },
+                theory: {
+                    ru: `Когда программа встречает что-то непонятное (например, пытается разделить на ноль), она падает и выдаёт ошибку. Этого можно избежать с помощью try/except.
+
+            📌 Записывается так:
+            try:
+                # код, который может вызвать ошибку
+                result = 10 / 0
+            except:
+                # что делать, если ошибка произошла
+                print("На ноль делить нельзя!")
+
+            💡 Можно ловить конкретные ошибки:
+            try:
+                number = int("abc")
+            except ValueError:
+                print("Это не число!")
+
+            🎯 В этом уроке ты научишься обрабатывать ошибки.`,
+                    en: `When a program encounters something unexpected (like trying to divide by zero), it crashes and shows an error. You can avoid this with try/except.
+
+            📌 Written like this:
+            try:
+                # code that might cause an error
+                result = 10 / 0
+            except:
+                # what to do if an error occurs
+                print("Cannot divide by zero!")
+
+            💡 You can catch specific errors:
+            try:
+                number = int("abc")
+            except ValueError:
+                print("That's not a number!")
+
+            🎯 In this lesson, you'll learn to handle errors.`,
+                    zh: `当程序遇到意外情况（如尝试除以零）时，它会崩溃并显示错误。使用 try/except 可以避免这种情况。
+
+            📌 写法：
+            try:
+                # 可能引起错误的代码
+                result = 10 / 0
+            except:
+                # 如果错误发生，做什么
+                print("不能除以零！")
+
+            💡 可以捕获特定错误：
+            try:
+                number = int("abc")
+            except ValueError:
+                print("那不是数字！")
+
+            🎯 在本课中，你将学习处理错误。`
+                },
+                example: {
+                    ru: `# Пример обработки ошибки
+            try:
+                number = int(input("Введите число: "))
+                print(10 / number)
+            except ValueError:
+                print("Это не число!")
+            except ZeroDivisionError:
+                print("На ноль делить нельзя!")`,
+                    en: `# Error handling example
+            try:
+                number = int(input("Enter a number: "))
+                print(10 / number)
+            except ValueError:
+                print("That's not a number!")
+            except ZeroDivisionError:
+                print("Cannot divide by zero!")`,
+                    zh: `# 错误处理示例
+            try:
+                number = int(input("输入一个数字："))
+                print(10 / number)
+            except ValueError:
+                print("那不是数字！")
+            except ZeroDivisionError:
+                print("不能除以零！")`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Напиши программу, которая обрабатывает деление на ноль',
+                        en: 'Write a program that handles division by zero',
+                        zh: '写程序处理除以零的错误',
+                        solution: 'try:\n    result = 10 / 0\nexcept ZeroDivisionError:\n    print("Cannot divide by zero!")',
+                        check: c => c.replace(/\s/g, '').includes('try:') && c.replace(/\s/g, '').includes(
+                            'ZeroDivisionError') },
+                    [
+                        { ru: 'Напиши программу, которая обрабатывает ошибку преобразования в число',
+                            en: 'Write a program that handles conversion errors',
+                            zh: '写程序处理类型转换错误',
+                            solution: 'try:\n    number = int("abc")\nexcept ValueError:\n    print("That\'s not a number!")',
+                            check: c => c.replace(/\s/g, '').includes('try:') && c.replace(/\s/g, '').includes(
+                                'ValueError') },
+                        { ru: 'Напиши программу, которая обрабатывает ошибку открытия файла',
+                            en: 'Write a program that handles file opening errors',
+                            zh: '写程序处理文件打开错误',
+                            solution: 'try:\n    file = open("nonexistent.txt")\nexcept FileNotFoundError:\n    print("File not found!")',
+                            check: c => c.replace(/\s/g, '').includes('try:') && c.replace(/\s/g, '').includes(
+                                'FileNotFoundError') },
+                        { ru: 'Напиши программу, которая просит ввести число, пока не введут правильное',
+                            en: 'Write a program that asks for a number until the user enters a valid one',
+                            zh: '写程序要求输入数字，直到用户输入有效数字为止',
+                            solution: 'while True:\n    try:\n        n = int(input("Enter a number: "))\n        break\n    except ValueError:\n        print("Try again!")',
+                            check: c => c.replace(/\s/g, '').includes('whileTrue:') && c.replace(/\s/g, '').includes(
+                                'try:') && c.replace(/\s/g, '').includes('ValueError') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 14: МОДУЛИ И ИМПОРТ ----
+            {
+                id: 14,
+                title: { ru: 'Модули и импорт', en: 'Modules & Import', zh: '模块与导入' },
+                theory: {
+                    ru: `Модуль — это как библиотека с готовыми инструментами. Вместо того чтобы писать всё самому, можно взять готовое.
+
+            📌 Как импортировать модуль:
+            import math  # импортирует целый модуль
+
+            print(math.sqrt(16))  # 4.0 — квадратный корень
+            print(math.pi)        # 3.1415...
+
+            📌 Импорт конкретной функции:
+            from math import sqrt, pi
+            print(sqrt(25))  # 5.0
+
+            💡 Популярные модули: math, random, datetime, os
+
+            🎯 В этом уроке ты научишься импортировать модули.`,
+                    en: `A module is like a library with ready-made tools. Instead of writing everything yourself, you can use what's already there.
+
+            📌 How to import a module:
+            import math  # imports the whole module
+
+            print(math.sqrt(16))  # 4.0 — square root
+            print(math.pi)        # 3.1415...
+
+            📌 Import a specific function:
+            from math import sqrt, pi
+            print(sqrt(25))  # 5.0
+
+            💡 Popular modules: math, random, datetime, os
+
+            🎯 In this lesson, you'll learn to import modules.`,
+                    zh: `模块就像一个包含现成工具的库。你不必自己写所有东西，可以使用已有的工具。
+
+            📌 如何导入模块：
+            import math  # 导入整个模块
+
+            print(math.sqrt(16))  # 4.0 — 平方根
+            print(math.pi)        # 3.1415...
+
+            📌 导入特定函数：
+            from math import sqrt, pi
+            print(sqrt(25))  # 5.0
+
+            💡 常用模块：math, random, datetime, os
+
+            🎯 在本课中，你将学习导入模块。`
+                },
+                example: {
+                    ru: `# Пример импорта
+            import math
+            print(math.sqrt(25))  # 5.0`,
+                    en: `# Import example
+            import math
+            print(math.sqrt(25))  # 5.0`,
+                    zh: `# 导入示例
+            import math
+            print(math.sqrt(25))  # 5.0`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Импортируй модуль math и выведи значение числа π (pi)',
+                        en: 'Import the math module and print the value of pi',
+                        zh: '导入 math 模块并打印 π 的值', solution: 'import math\nprint(math.pi)',
+                        check: c => c.replace(/\s/g, '').includes('importmath') && c.replace(/\s/g, '').includes(
+                            'print(math.pi)') },
+                    [
+                        { ru: 'Импортируй функцию sqrt из модуля math и выведи корень из 25',
+                            en: 'Import sqrt from math and print the square root of 25',
+                            zh: '从 math 导入 sqrt 并打印 25 的平方根',
+                            solution: 'from math import sqrt\nprint(sqrt(25))', check: c => c.replace(/\s/g, '')
+                                .includes('frommathimportsqrt') && c.replace(/\s/g, '').includes('print(sqrt(25))') },
+                        { ru: 'Импортируй модуль random и выведи случайное число от 1 до 10',
+                            en: 'Import the random module and print a random number from 1 to 10',
+                            zh: '导入 random 模块并打印 1 到 10 之间的随机数',
+                            solution: 'import random\nprint(random.randint(1, 10))', check: c => c.replace(/\s/g, '')
+                                .includes('importrandom') && c.replace(/\s/g, '').includes('random.randint') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 15: ГЕНЕРАТОРЫ СПИСКОВ ----
+            {
+                id: 15,
+                title: { ru: 'Генераторы списков', en: 'List Comprehensions', zh: '列表推导式' },
+                theory: {
+                    ru: `Генераторы списков — это короткий способ создать список. Вместо того чтобы писать цикл с append(), можно написать всё в одну строку.
+
+            📌 Обычный способ:
+            squares = []
+            for x in range(5):
+                squares.append(x * 2)
+
+            📌 Генератор списков (то же самое, но короче):
+            squares = [x * 2 for x in range(5)]
+
+            📌 С условием:
+            even_numbers = [x for x in range(10) if x % 2 == 0]
+
+            🎯 В этом уроке ты научишься создавать списки с помощью генераторов.`,
+                    en: `List comprehensions are a short way to create a list. Instead of writing a loop with append(), you can write everything in one line.
+
+            📌 Regular way:
+            squares = []
+            for x in range(5):
+                squares.append(x * 2)
+
+            📌 List comprehension (same thing, but shorter):
+            squares = [x * 2 for x in range(5)]
+
+            📌 With a condition:
+            even_numbers = [x for x in range(10) if x % 2 == 0]
+
+            🎯 In this lesson, you'll learn to create lists with comprehensions.`,
+                    zh: `列表推导式是创建列表的简便方法。不用写带有 append() 的循环，你可以在一行中完成所有操作。
+
+            📌 常规方式：
+            squares = []
+            for x in range(5):
+                squares.append(x * 2)
+
+            📌 列表推导式（相同功能，更简洁）：
+            squares = [x * 2 for x in range(5)]
+
+            📌 带条件：
+            even_numbers = [x for x in range(10) if x % 2 == 0]
+
+            🎯 在本课中，你将学习使用列表推导式创建列表。`
+                },
+                example: {
+                    ru: `# Пример генератора списков
+            squares = [x**2 for x in range(5)]
+            print(squares)  # [0, 1, 4, 9, 16]`,
+                    en: `# List comprehension example
+            squares = [x**2 for x in range(5)]
+            print(squares)  # [0, 1, 4, 9, 16]`,
+                    zh: `# 列表推导式示例
+            squares = [x**2 for x in range(5)]
+            print(squares)  # [0, 1, 4, 9, 16]`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Создай список квадратов чисел от 0 до 4 с помощью генератора',
+                        en: 'Create a list of squares of numbers 0 to 4 using a comprehension',
+                        zh: '使用推导式创建 0 到 4 的平方列表',
+                        solution: 'squares = [x**2 for x in range(5)]', check: c => c.replace(/\s/g, '')
+                            .includes('squares=[x**2forxinrange(5)]') },
+                    [
+                        { ru: 'Создай список чётных чисел от 0 до 9 с помощью генератора',
+                            en: 'Create a list of even numbers from 0 to 9 using a comprehension',
+                            zh: '使用推导式创建 0 到 9 的偶数列表',
+                            solution: 'evens = [x for x in range(10) if x % 2 == 0]', check: c => c.replace(/\s/g, '')
+                                .includes('evens=[xforxinrange(10)ifx%2==0]') },
+                        { ru: 'Создай список длин строк из списка слов',
+                            en: 'Create a list of string lengths from a list of words',
+                            zh: '从单词列表创建字符串长度列表',
+                            solution: 'words = ["apple", "banana", "cherry"]\nlens = [len(w) for w in words]',
+                            check: c => c.replace(/\s/g, '').includes('words=["apple","banana","cherry"]') && c
+                                .replace(/\s/g, '').includes('lens=[len(w)forwinwords]') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 16: ЛЯМБДА-ФУНКЦИИ ----
+            {
+                id: 16,
+                title: { ru: 'Лямбда-функции', en: 'Lambda Functions', zh: 'Lambda 函数' },
+                theory: {
+                    ru: `Лямбда-функции — это маленькие функции на одну строку. Используются, когда нужно написать что-то простое, но не хочется создавать целую функцию через def.
+
+            📌 Обычная функция:
+            def multiply_by_two(x):
+                return x * 2
+
+            📌 Лямбда-функция (то же самое):
+            multiply = lambda x: x * 2
+            print(multiply(5))  # 10
+
+            💡 Применяется в sorted(), map(), filter().
+
+            🎯 В этом уроке ты научишься создавать лямбда-функции.`,
+                    en: `Lambda functions are small one-line functions. They're used when you need something simple but don't want to create a full function with def.
+
+            📌 Regular function:
+            def multiply_by_two(x):
+                return x * 2
+
+            📌 Lambda function (same thing):
+            multiply = lambda x: x * 2
+            print(multiply(5))  # 10
+
+            💡 Used in sorted(), map(), filter().
+
+            🎯 In this lesson, you'll learn to create lambda functions.`,
+                    zh: `Lambda 函数是单行小函数。当你需要简单操作但不想用 def 创建完整函数时使用。
+
+            📌 常规函数：
+            def multiply_by_two(x):
+                return x * 2
+
+            📌 Lambda 函数（相同功能）：
+            multiply = lambda x: x * 2
+            print(multiply(5))  # 10
+
+            💡 用于 sorted(), map(), filter()。
+
+            🎯 在本课中，你将学习创建 lambda 函数。`
+                },
+                example: {
+                    ru: `# Пример лямбда-функции
+            multiply = lambda x: x * 2
+            print(multiply(5))  # 10`,
+                    en: `# Lambda function example
+            multiply = lambda x: x * 2
+            print(multiply(5))  # 10`,
+                    zh: `# Lambda 函数示例
+            multiply = lambda x: x * 2
+            print(multiply(5))  # 10`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Создай лямбда-функцию, которая умножает число на 3',
+                        en: 'Create a lambda function that multiplies a number by 3',
+                        zh: '创建将数字乘以 3 的 lambda 函数', solution: 'triple = lambda x: x * 3',
+                        check: c => c.replace(/\s/g, '').includes('triple=lambda x:x*3') },
+                    [
+                        { ru: 'Создай лямбда-функцию, которая складывает два числа',
+                            en: 'Create a lambda function that adds two numbers',
+                            zh: '创建将两个数字相加的 lambda 函数', solution: 'add = lambda a, b: a + b',
+                            check: c => c.replace(/\s/g, '').includes('add=lambda a,b:a+b') },
+                        { ru: 'Используй lambda с sorted() для сортировки по длине строки',
+                            en: 'Use lambda with sorted() to sort by string length',
+                            zh: '将 lambda 与 sorted() 一起使用，按字符串长度排序',
+                            solution: 'words = ["apple", "kiwi", "banana"]\nsorted_words = sorted(words, key=lambda x: len(x))',
+                            check: c => c.replace(/\s/g, '').includes('words=["apple","kiwi","banana"]') && c.replace(
+                                /\s/g, '').includes('sorted(words,key=lambda x:len(x))') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 17: ДАТЫ (datetime) ----
+            {
+                id: 17,
+                title: { ru: 'Работа с датами', en: 'Dates & Time', zh: '日期与时间' },
+                theory: {
+                    ru: `Модуль datetime позволяет работать с датами и временем.
+
+            📌 Получить текущую дату и время:
+            import datetime
+            now = datetime.datetime.now()
+            print(now)
+
+            📌 Получить только дату:
+            today = datetime.date.today()
+            print(today)
+
+            📌 Форматирование даты:
+            now.strftime("%d.%m.%Y")  # 04.07.2026
+            now.strftime("%B %d, %Y")  # July 04, 2026
+
+            🎯 В этом уроке ты научишься работать с датами.`,
+                    en: `The datetime module allows working with dates and times.
+
+            📌 Get current date and time:
+            import datetime
+            now = datetime.datetime.now()
+            print(now)
+
+            📌 Get only the date:
+            today = datetime.date.today()
+            print(today)
+
+            📌 Date formatting:
+            now.strftime("%d.%m.%Y")  # 04.07.2026
+            now.strftime("%B %d, %Y")  # July 04, 2026
+
+            🎯 In this lesson, you'll learn to work with dates.`,
+                    zh: `datetime 模块允许处理日期和时间。
+
+            📌 获取当前日期和时间：
+            import datetime
+            now = datetime.datetime.now()
+            print(now)
+
+            📌 只获取日期：
+            today = datetime.date.today()
+            print(today)
+
+            📌 日期格式化：
+            now.strftime("%d.%m.%Y")  # 04.07.2026
+            now.strftime("%B %d, %Y")  # July 04, 2026
+
+            🎯 在本课中，你将学习使用日期。`
+                },
+                example: {
+                    ru: `# Пример работы с датами
+            import datetime
+            now = datetime.datetime.now()
+            print(now.strftime("%d.%m.%Y"))`,
+                    en: `# Date example
+            import datetime
+            now = datetime.datetime.now()
+            print(now.strftime("%d.%m.%Y"))`,
+                    zh: `# 日期示例
+            import datetime
+            now = datetime.datetime.now()
+            print(now.strftime("%d.%m.%Y"))`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Выведи текущую дату в формате ДД.ММ.ГГГГ',
+                        en: 'Print the current date in DD.MM.YYYY format',
+                        zh: '以 DD.MM.YYYY 格式打印当前日期',
+                        solution: 'import datetime\nprint(datetime.datetime.now().strftime("%d.%m.%Y"))',
+                        check: c => c.replace(/\s/g, '').includes('importdatetime') && c.replace(/\s/g, '')
+                            .includes('strftime("%d.%m.%Y")') },
+                    [
+                        { ru: 'Выведи текущее время в формате ЧЧ:ММ:СС',
+                            en: 'Print the current time in HH:MM:SS format',
+                            zh: '以 HH:MM:SS 格式打印当前时间',
+                            solution: 'import datetime\nprint(datetime.datetime.now().strftime("%H:%M:%S"))',
+                            check: c => c.replace(/\s/g, '').includes('importdatetime') && c.replace(/\s/g, '')
+                                .includes('strftime("%H:%M:%S")') },
+                        { ru: 'Выведи текущий год, месяц и день отдельно',
+                            en: 'Print the current year, month, and day separately',
+                            zh: '分别打印当前的年、月、日',
+                            solution: 'import datetime\nnow = datetime.datetime.now()\nprint(now.year, now.month, now.day)',
+                            check: c => c.replace(/\s/g, '').includes('importdatetime') && c.replace(/\s/g, '')
+                                .includes('now.year') && c.replace(/\s/g, '').includes('now.month') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 18: РЕГУЛЯРНЫЕ ВЫРАЖЕНИЯ ----
+            {
+                id: 18,
+                title: { ru: 'Регулярные выражения', en: 'Regex', zh: '正则表达式' },
+                theory: {
+                    ru: `Регулярные выражения — это способ искать текст по шаблону. Например, найти все email-адреса или номера телефонов.
+
+            📌 Как использовать:
+            import re
+            text = "Мой email: anna@example.com"
+            pattern = r"\w+@\w+\.\w+"
+            result = re.search(pattern, text)
+            print(result.group())  # anna@example.com
+
+            📌 Простые шаблоны:
+            • \d — любая цифра
+            • \w — любая буква или цифра
+            • \s — пробел
+            • + — один или более раз
+
+            🎯 В этом уроке ты научишься искать текст по шаблону.`,
+                    en: `Regular expressions are a way to search text by pattern. For example, find all email addresses or phone numbers.
+
+            📌 How to use:
+            import re
+            text = "My email: anna@example.com"
+            pattern = r"\w+@\w+\.\w+"
+            result = re.search(pattern, text)
+            print(result.group())  # anna@example.com
+
+            📌 Simple patterns:
+            • \d — any digit
+            • \w — any letter or digit
+            • \s — space
+            • + — one or more times
+
+            🎯 In this lesson, you'll learn to search text by pattern.`,
+                    zh: `正则表达式是一种按模式搜索文本的方法。例如，查找所有电子邮件地址或电话号码。
+
+            📌 如何使用：
+            import re
+            text = "我的邮箱：anna@example.com"
+            pattern = r"\w+@\w+\.\w+"
+            result = re.search(pattern, text)
+            print(result.group())  # anna@example.com
+
+            📌 简单模式：
+            • \d — 任何数字
+            • \w — 任何字母或数字
+            • \s — 空格
+            • + — 一个或多个
+
+            🎯 在本课中，你将学习按模式搜索文本。`
+                },
+                example: {
+                    ru: `# Пример регулярного выражения
+            import re
+            text = "Найди все числа: 42 и 7"
+            numbers = re.findall(r"\d+", text)
+            print(numbers)  # ['42', '7']`,
+                    en: `# Regex example
+            import re
+            text = "Find all numbers: 42 and 7"
+            numbers = re.findall(r"\d+", text)
+            print(numbers)  # ['42', '7']`,
+                    zh: `# 正则表达式示例
+            import re
+            text = "找到所有数字：42 和 7"
+            numbers = re.findall(r"\d+", text)
+            print(numbers)  # ['42', '7']`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Найди все числа в тексте с помощью re.findall',
+                        en: 'Find all numbers in text using re.findall',
+                        zh: '使用 re.findall 查找文本中的所有数字',
+                        solution: 'import re\ntext = "I have 2 apples and 5 bananas"\nprint(re.findall(r"\\d+", text))',
+                        check: c => c.replace(/\s/g, '').includes('importre') && c.replace(/\s/g, '').includes(
+                            're.findall') },
+                    [
+                        { ru: 'Найди все слова в тексте (буквы)', en: 'Find all words in text (letters)',
+                            zh: '查找文本中的所有单词（字母）',
+                            solution: 'import re\ntext = "Hello, world!"\nprint(re.findall(r"\\w+", text))',
+                            check: c => c.replace(/\s/g, '').includes('importre') && c.replace(/\s/g, '').includes(
+                                're.findall') },
+                        { ru: 'Найди все email-адреса в тексте', en: 'Find all email addresses in text',
+                            zh: '查找文本中的所有电子邮件地址',
+                            solution: 'import re\ntext = "Contact me at test@example.com"\nprint(re.findall(r"\\w+@\\w+\\.\\w+", text))',
+                            check: c => c.replace(/\s/g, '').includes('importre') && c.replace(/\s/g, '').includes(
+                                're.findall') },
+                    ]
+                )
+            },
+
+            // ---- УРОК 19: ПРОЕКТ: КАЛЬКУЛЯТОР ----
+            {
+                id: 19,
+                title: { ru: 'Проект: Калькулятор', en: 'Project: Calculator', zh: '项目：计算器' },
+                theory: {
+                    ru: `Собери всё вместе! Напиши калькулятор, который умеет складывать, вычитать, умножать и делить два числа.
+
+            📌 План:
+            1. Запросить у пользователя первое число.
+            2. Запросить операцию (+, -, *, /).
+            3. Запросить второе число.
+            4. Выполнить операцию.
+            5. Вывести результат.
+
+            🎯 В этом уроке ты создашь свой первый полноценный проект!`,
+                    en: `Bring it all together! Write a calculator that can add, subtract, multiply, and divide two numbers.
+
+            📌 Plan:
+            1. Ask the user for the first number.
+            2. Ask for the operation (+, -, *, /).
+            3. Ask for the second number.
+            4. Perform the operation.
+            5. Print the result.
+
+            🎯 In this lesson, you'll create your first full project!`,
+                    zh: `把所有的知识结合在一起！编写一个可以加减乘除两个数的计算器。
+
+            📌 计划：
+            1. 向用户询问第一个数字。
+            2. 询问操作符 (+, -, *, /)。
+            3. 询问第二个数字。
+            4. 执行操作。
+            5. 打印结果。
+
+            🎯 在本课中，你将创建你的第一个完整项目！`
+                },
+                example: {
+                    ru: `# Пример решения
+            def calculator():
+                a = float(input("Введите первое число: "))
+                op = input("Введите операцию (+, -, *, /): ")
+                b = float(input("Введите второе число: "))
+                if op == "+":
+                    print(a + b)
+                elif op == "-":
+                    print(a - b)
+                elif op == "*":
+                    print(a * b)
+                elif op == "/":
+                    if b != 0:
+                        print(a / b)
+                    else:
+                        print("На ноль делить нельзя!")
+            calculator()`,
+                    en: `# Example solution
+            def calculator():
+                a = float(input("Enter first number: "))
+                op = input("Enter operation (+, -, *, /): ")
+                b = float(input("Enter second number: "))
+                if op == "+":
+                    print(a + b)
+                elif op == "-":
+                    print(a - b)
+                elif op == "*":
+                    print(a * b)
+                elif op == "/":
+                    if b != 0:
+                        print(a / b)
+                    else:
+                        print("Cannot divide by zero!")
+            calculator()`,
+                    zh: `# 示例解法
+            def calculator():
+                a = float(input("输入第一个数字："))
+                op = input("输入操作符 (+, -, *, /)：")
+                b = float(input("输入第二个数字："))
+                if op == "+":
+                    print(a + b)
+                elif op == "-":
+                    print(a - b)
+                elif op == "*":
+                    print(a * b)
+                elif op == "/":
+                    if b != 0:
+                        print(a / b)
+                    else:
+                        print("不能除以零！")
+            calculator()`
+                },
+                isPaid: false,
+                tasks: makeTasks(
+                    { ru: 'Напиши функцию-калькулятор с операциями +, -, *, /',
+                        en: 'Write a calculator function with operations +, -, *, /',
+                        zh: '编写带有 +, -, *, / 操作的计算器函数',
+                        solution: 'def calc(a, op, b):\n    if op == "+": return a + b\n    elif op == "-": return a - b\n    elif op == "*": return a * b\n    elif op == "/": return a / b if b != 0 else "Error"',
+                        check: c => c.replace(/\s/g, '').includes('defcalc') && c.replace(/\s/g, '').includes(
+                            'returna+b') },
+                    [
+                        { ru: 'Добавь обработку деления на ноль в калькулятор',
+                            en: 'Add division by zero handling to the calculator',
+                            zh: '在计算器中添加除零处理',
+                            solution: 'if op == "/":\n    if b == 0:\n        return "Cannot divide by zero!"',
+                            check: c => c.replace(/\s/g, '').includes('ifb==0') },
+                        { ru: 'Добавь операцию возведения в степень (**) в калькулятор',
+                            en: 'Add exponentiation operation (**) to the calculator',
+                            zh: '在计算器中添加幂运算 (**)',
+                            solution: 'elif op == "**": return a ** b', check: c => c.replace(/\s/g, '').includes(
+                                'returna**b') },
+                    ]
+                )
+            },
+
+            // ============================================================
+            //  ПЛАТНЫЕ УРОКИ (8 ШТУК) — С ПОЛНОЙ ТЕОРИЕЙ
+            // ============================================================
+
+            // ---- УРОК 20: БИНАРНЫЙ ПОИСК ----
+            {
+                id: 20,
+                title: { ru: 'Бинарный поиск', en: 'Binary Search', zh: '二分搜索' },
+                theory: {
+                    ru: `Бинарный поиск — это способ найти число в отсортированном списке очень-очень быстро. Представь, что ты ищешь слово в толстом словаре. Ты же не читаешь каждую страницу подряд? Ты открываешь книгу примерно посередине, смотришь, где твоё слово, и отбрасываешь половину страниц. Так же работает и бинарный поиск!
+
+            📌 Как это работает:
+            1. Берёшь отсортированный список (например, [1, 3, 5, 7, 9, 11, 13]).
+            2. Смотришь на элемент в середине.
+            3. Если он равен тому, что ищешь — готово!
+            4. Если он больше искомого — отбрасываешь правую половину.
+            5. Если он меньше искомого — отбрасываешь левую половину.
+            6. Повторяешь, пока не найдёшь.
+
+            📌 Скорость: O(log N). Что это значит?
+            Если в списке 1 000 000 элементов, бинарный поиск найдёт нужный за 20 шагов! А обычный (линейный) поиск — за 1 000 000 шагов.
+
+            💡 Где применяется: поиск в базах данных, в играх (поиск по рейтингу), в любых отсортированных данных.
+
+            🎯 В этом уроке ты научишься писать бинарный поиск на Python.`,
+                    en: `Binary search is a way to find a number in a sorted list very, very quickly. Imagine you're looking for a word in a thick dictionary. You don't read every page, right? You open the book roughly in the middle, see where your word is, and throw away half the pages. Binary search works the same way!
+
+            📌 How it works:
+            1. Take a sorted list (e.g., [1, 3, 5, 7, 9, 11, 13]).
+            2. Look at the element in the middle.
+            3. If it's the one you're looking for — done!
+            4. If it's larger than what you're looking for — discard the right half.
+            5. If it's smaller — discard the left half.
+            6. Repeat until you find it.
+
+            📌 Speed: O(log N). What does that mean?
+            If the list has 1,000,000 elements, binary search will find what you need in 20 steps! Regular (linear) search would take 1,000,000 steps.
+
+            💡 Where it's used: searching in databases, in games (rating search), in any sorted data.
+
+            🎯 In this lesson, you'll learn to write binary search in Python.`,
+                    zh: `二分搜索是一种在排序列表中极快查找数字的方法。想象你在厚厚的字典中查找一个单词。你不是一页一页地读，对吧？你大致打开书的中间，看看你的词在哪里，然后扔掉一半的页面。二分搜索也是同样的原理！
+
+            📌 工作原理：
+            1. 取一个排序列表（例如 [1, 3, 5, 7, 9, 11, 13]）。
+            2. 查看中间的元素。
+            3. 如果它就是你找的——完成！
+            4. 如果它比目标大——丢弃右半部分。
+            5. 如果它比目标小——丢弃左半部分。
+            6. 重复直到找到。
+
+            📌 速度：O(log N)。这意味着什么？
+            如果列表有 1,000,000 个元素，二分搜索只需要 20 步就能找到！而普通（线性）搜索需要 1,000,000 步。
+
+            💡 应用场景：数据库搜索、游戏（排位搜索）、任何排序数据。
+
+            🎯 在本课中，你将学习用 Python 编写二分搜索。`
+                },
+                example: {
+                    ru: `# Бинарный поиск
+            def binary_search(arr, target):
+                left, right = 0, len(arr) - 1
+                while left <= right:
+                    mid = (left + right) // 2
+                    if arr[mid] == target:
+                        return mid
+                    elif arr[mid] < target:
+                        left = mid + 1
+                    else:
+                        right = mid - 1
+                return -1`,
+                    en: `# Binary search
+            def binary_search(arr, target):
+                left, right = 0, len(arr) - 1
+                while left <= right:
+                    mid = (left + right) // 2
+                    if arr[mid] == target:
+                        return mid
+                    elif arr[mid] < target:
+                        left = mid + 1
+                    else:
+                        right = mid - 1
+                return -1`,
+                    zh: `# 二分搜索
+            def binary_search(arr, target):
+                left, right = 0, len(arr) - 1
+                while left <= right:
+                    mid = (left + right) // 2
+                    if arr[mid] == target:
+                        return mid
+                    elif arr[mid] < target:
+                        left = mid + 1
+                    else:
+                        right = mid - 1
+                return -1`
+                },
+                isPaid: true,
+                tasks: makeTasks(
+                    { ru: 'Напиши функцию бинарного поиска', en: 'Write a binary search function',
+                        zh: '编写二分搜索函数', solution: 'def binary_search(arr, target):\n    left, right = 0, len(arr)-1\n    while left <= right:\n        mid = (left+right)//2\n        if arr[mid] == target: return mid\n        elif arr[mid] < target: left = mid+1\n        else: right = mid-1\n    return -1',
+                        check: c => c.replace(/\s/g, '').includes('defbinary_search') && c.replace(/\s/g, '')
+                            .includes('whileleft<=right') },
+                    [
+                        { ru: 'Найди индекс числа 5 в отсортированном списке',
+                            en: 'Find the index of number 5 in a sorted list',
+                            zh: '在排序列表中查找数字 5 的索引',
+                            solution: 'arr = [1, 2, 3, 4, 5]\nprint(binary_search(arr, 5))', check: c => c.replace(/\s/g,
+                                '').includes('arr=[1,2,3,4,5]') },
+                        { ru: 'Доп. задача 2 по бинарному поиску', en: 'Bonus task 2 for binary search',
+                            zh: '二分搜索附加任务 2', solution: '# Бонус 2', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 3 по бинарному поиску', en: 'Bonus task 3 for binary search',
+                            zh: '二分搜索附加任务 3', solution: '# Бонус 3', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 4 по бинарному поиску', en: 'Bonus task 4 for binary search',
+                            zh: '二分搜索附加任务 4', solution: '# Бонус 4', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 5 по бинарному поиску', en: 'Bonus task 5 for binary search',
+                            zh: '二分搜索附加任务 5', solution: '# Бонус 5', check: c => c.trim().length > 5 },
+                    ]
+                )
+            },
+
+            // ---- УРОК 21: СОРТИРОВКА СЛИЯНИЕМ ----
+            {
+                id: 21,
+                title: { ru: 'Сортировка слиянием', en: 'Merge Sort', zh: '归并排序' },
+                theory: {
+                    ru: `Сортировка слиянием — это один из самых эффективных способов упорядочить список. Он работает по принципу "разделяй и властвуй": разбивает большую задачу на маленькие, решает их и соединяет результаты.
+
+            📌 Как работает:
+            1. Делит список пополам.
+            2. Сортирует каждую половину отдельно (рекурсивно).
+            3. Сливает две отсортированные половины в одну.
+
+            📌 Пример: [38, 27, 43, 3, 9, 82, 10]
+            → [38, 27, 43] и [3, 9, 82, 10]
+            → [38] [27, 43] [3, 9] [82, 10]
+            → сортировка и слияние: [3, 9, 10, 27, 38, 43, 82]
+
+            📌 Скорость: O(N log N) — это очень быстро! Даже для миллионов элементов.
+
+            💡 Где применяется: во всех языках программирования есть встроенная сортировка, но понимать, как она работает внутри — это признак настоящего инженера.
+
+            🎯 В этом уроке ты напишешь свою собственную сортировку слиянием!`,
+                    en: `Merge sort is one of the most efficient ways to sort a list. It works on the "divide and conquer" principle: break a big problem into small ones, solve them, and combine the results.
+
+            📌 How it works:
+            1. Divides the list in half.
+            2. Sorts each half separately (recursively).
+            3. Merges the two sorted halves into one.
+
+            📌 Example: [38, 27, 43, 3, 9, 82, 10]
+            → [38, 27, 43] and [3, 9, 82, 10]
+            → [38] [27, 43] [3, 9] [82, 10]
+            → sorting and merging: [3, 9, 10, 27, 38, 43, 82]
+
+            📌 Speed: O(N log N) — very fast! Even for millions of elements.
+
+            💡 Where it's used: every programming language has built-in sorting, but understanding how it works inside — that's the mark of a real engineer.
+
+            🎯 In this lesson, you'll write your own merge sort!`,
+                    zh: `归并排序是最有效的排序方法之一。它遵循"分而治之"原则：将大问题分解为小问题，解决它们，然后合并结果。
+
+            📌 工作原理：
+            1. 将列表分成两半。
+            2. 分别对每一半进行排序（递归）。
+            3. 将两个排序好的半部分合并成一个。
+
+            📌 示例：[38, 27, 43, 3, 9, 82, 10]
+            → [38, 27, 43] 和 [3, 9, 82, 10]
+            → [38] [27, 43] [3, 9] [82, 10]
+            → 排序和合并：[3, 9, 10, 27, 38, 43, 82]
+
+            📌 速度：O(N log N) — 非常快！即使对百万级元素也很快。
+
+            💡 应用场景：每种编程语言都有内置排序，但理解其内部工作原理——是真正工程师的标志。
+
+            🎯 在本课中，你将编写你自己的归并排序！`
+                },
+                example: {
+                    ru: `# Сортировка слиянием
+            def merge_sort(arr):
+                if len(arr) <= 1:
+                    return arr
+                mid = len(arr) // 2
+                left = merge_sort(arr[:mid])
+                right = merge_sort(arr[mid:])
+                return merge(left, right)`,
+                    en: `# Merge sort
+            def merge_sort(arr):
+                if len(arr) <= 1:
+                    return arr
+                mid = len(arr) // 2
+                left = merge_sort(arr[:mid])
+                right = merge_sort(arr[mid:])
+                return merge(left, right)`,
+                    zh: `# 归并排序
+            def merge_sort(arr):
+                if len(arr) <= 1:
+                    return arr
+                mid = len(arr) // 2
+                left = merge_sort(arr[:mid])
+                right = merge_sort(arr[mid:])
+                return merge(left, right)`
+                },
+                isPaid: true,
+                tasks: makeTasks(
+                    { ru: 'Напиши функцию сортировки слиянием', en: 'Write a merge sort function',
+                        zh: '编写归并排序函数',
+                        solution: 'def merge_sort(arr):\n    if len(arr) <= 1:\n        return arr\n    mid = len(arr)//2\n    left = merge_sort(arr[:mid])\n    right = merge_sort(arr[mid:])\n    return merge(left, right)',
+                        check: c => c.replace(/\s/g, '').includes('defmerge_sort') && c.replace(/\s/g, '')
+                            .includes('merge(left,right)') },
+                    [
+                        { ru: 'Доп. задача 1 по сортировке слиянием', en: 'Bonus task 1 for merge sort',
+                            zh: '归并排序附加任务 1', solution: '# Бонус 1', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 2 по сортировке слиянием', en: 'Bonus task 2 for merge sort',
+                            zh: '归并排序附加任务 2', solution: '# Бонус 2', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 3 по сортировке слиянием', en: 'Bonus task 3 for merge sort',
+                            zh: '归并排序附加任务 3', solution: '# Бонус 3', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 4 по сортировке слиянием', en: 'Bonus task 4 for merge sort',
+                            zh: '归并排序附加任务 4', solution: '# Бонус 4', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 5 по сортировке слиянием', en: 'Bonus task 5 for merge sort',
+                            zh: '归并排序附加任务 5', solution: '# Бонус 5', check: c => c.trim().length > 5 },
+                    ]
+                )
+            },
+
+            // ---- УРОК 22: ДИНАМИЧЕСКОЕ ПРОГРАММИРОВАНИЕ ----
+            {
+                id: 22,
+                title: { ru: 'Динамическое программирование', en: 'Dynamic Programming', zh: '动态规划' },
+                theory: {
+                    ru: `Динамическое программирование (ДП) — это метод, который помогает решать сложные задачи, разбивая их на простые подзадачи и запоминая результаты. Это как если бы ты решала головоломку: сначала собираешь углы, потом края, а затем середину — и запоминаешь, как ты это сделала.
+
+            📌 Классический пример: числа Фибоначчи.
+            F(0) = 0, F(1) = 1, F(2) = 1, F(3) = 2, F(4) = 3...
+            Каждое число — это сумма двух предыдущих.
+
+            ❌ Без ДП (рекурсия) — очень медленно, потому что считает одно и то же много раз.
+            ✅ С ДП (запоминаем результаты) — быстро!
+
+            📌 Как работает ДП на примере чисел Фибоначчи:
+            dp[0] = 0, dp[1] = 1
+            for i = 2 to n:
+                dp[i] = dp[i-1] + dp[i-2]
+
+            📌 Скорость: O(N) — линейная, даже для больших чисел.
+
+            💡 Где применяется: поиск кратчайшего пути, задача о рюкзаке, расчёт выигрышных стратегий в играх.
+
+            🎯 В этом уроке ты научишься решать задачи с помощью ДП!`,
+                    en: `Dynamic Programming (DP) is a method that helps solve complex problems by breaking them into simple subproblems and storing their results. It's like solving a puzzle: first you solve the corners, then the edges, then the middle — and you remember how you did it.
+
+            📌 Classic example: Fibonacci numbers.
+            F(0) = 0, F(1) = 1, F(2) = 1, F(3) = 2, F(4) = 3...
+            Each number is the sum of the two previous ones.
+
+            ❌ Without DP (recursion) — very slow, because it calculates the same thing many times.
+            ✅ With DP (remembering results) — fast!
+
+            📌 How DP works on Fibonacci:
+            dp[0] = 0, dp[1] = 1
+            for i = 2 to n:
+                dp[i] = dp[i-1] + dp[i-2]
+
+            📌 Speed: O(N) — linear, even for large numbers.
+
+            💡 Where it's used: shortest path finding, knapsack problem, calculating winning strategies in games.
+
+            🎯 In this lesson, you'll learn to solve problems using DP!`,
+                    zh: `动态规划（DP）是一种通过将复杂问题分解为简单子问题并存储结果来解决问题的方法。就像解拼图：先拼角，再拼边，然后拼中间——并记住你是怎么拼的。
+
+            📌 经典示例：斐波那契数列。
+            F(0) = 0, F(1) = 1, F(2) = 1, F(3) = 2, F(4) = 3...
+            每个数字是前两个数字之和。
+
+            ❌ 不用 DP（递归）— 非常慢，因为重复计算相同内容。
+            ✅ 使用 DP（记住结果）— 快速！
+
+            📌 DP 在斐波那契数列上的工作方式：
+            dp[0] = 0, dp[1] = 1
+            for i = 2 to n:
+                dp[i] = dp[i-1] + dp[i-2]
+
+            📌 速度：O(N) — 线性，即使用于大数字。
+
+            💡 应用场景：最短路径查找、背包问题、游戏中的胜算策略计算。
+
+            🎯 在本课中，你将学习使用 DP 解决问题！`
+                },
+                example: {
+                    ru: `# ДП: числа Фибоначчи
+            def fib_dp(n):
+                dp = [0] * (n + 1)
+                dp[1] = 1
+                for i in range(2, n + 1):
+                    dp[i] = dp[i-1] + dp[i-2]
+                return dp[n]`,
+                    en: `# DP: Fibonacci numbers
+            def fib_dp(n):
+                dp = [0] * (n + 1)
+                dp[1] = 1
+                for i in range(2, n + 1):
+                    dp[i] = dp[i-1] + dp[i-2]
+                return dp[n]`,
+                    zh: `# DP：斐波那契数列
+            def fib_dp(n):
+                dp = [0] * (n + 1)
+                dp[1] = 1
+                for i in range(2, n + 1):
+                    dp[i] = dp[i-1] + dp[i-2]
+                return dp[n]`
+                },
+                isPaid: true,
+                tasks: makeTasks(
+                    { ru: 'Напиши функцию для вычисления числа Фибоначчи через ДП',
+                        en: 'Write a DP function to calculate the Fibonacci number',
+                        zh: '编写 DP 函数计算斐波那契数',
+                        solution: 'def fib_dp(n):\n    dp = [0] * (n+1)\n    dp[1] = 1\n    for i in range(2, n+1):\n        dp[i] = dp[i-1] + dp[i-2]\n    return dp[n]',
+                        check: c => c.replace(/\s/g, '').includes('deffib_dp') && c.replace(/\s/g, '').includes(
+                            'dp[i]=dp[i-1]+dp[i-2]') },
+                    [
+                        { ru: 'Доп. задача 1 по динамическому программированию',
+                            en: 'Bonus task 1 for dynamic programming', zh: '动态规划附加任务 1',
+                            solution: '# Бонус 1', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 2 по динамическому программированию',
+                            en: 'Bonus task 2 for dynamic programming', zh: '动态规划附加任务 2',
+                            solution: '# Бонус 2', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 3 по динамическому программированию',
+                            en: 'Bonus task 3 for dynamic programming', zh: '动态规划附加任务 3',
+                            solution: '# Бонус 3', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 4 по динамическому программированию',
+                            en: 'Bonus task 4 for dynamic programming', zh: '动态规划附加任务 4',
+                            solution: '# Бонус 4', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 5 по динамическому программированию',
+                            en: 'Bonus task 5 for dynamic programming', zh: '动态规划附加任务 5',
+                            solution: '# Бонус 5', check: c => c.trim().length > 5 },
+                    ]
+                )
+            },
+
+            // ---- УРОК 23: РАБОТА С API ----
+            {
+                id: 23,
+                title: { ru: 'Работа с API', en: 'API Integration', zh: 'API 集成' },
+                theory: {
+                    ru: `API (Application Programming Interface) — это как меню в ресторане. Ты не заходишь на кухню, а просто выбираешь блюдо из меню, и тебе его приносят. API работает так же: ты отправляешь запрос и получаешь готовый ответ.
+
+            📌 Как это работает:
+            1. Ты пишешь программу, которая отправляет HTTP-запрос на сервер.
+            2. Сервер обрабатывает запрос и возвращает данные (обычно в формате JSON).
+            3. Ты получаешь эти данные и используешь в своей программе.
+
+            📌 Пример: получить информацию о пользователе с GitHub.
+            import requests
+            response = requests.get("https://api.github.com/users/octocat")
+            data = response.json()
+            print(data["login"])  # octocat
+
+            📌 Для работы с API нужно установить библиотеку requests:
+            pip install requests
+
+            💡 Где применяется: погода, новости, карты, социальные сети, платежи.
+
+            🎯 В этом уроке ты научишься получать данные из интернета!`,
+                    en: `API (Application Programming Interface) is like a restaurant menu. You don't go into the kitchen — you just choose a dish from the menu and they bring it to you. API works the same way: you send a request and get a ready response.
+
+            📌 How it works:
+            1. You write a program that sends an HTTP request to a server.
+            2. The server processes the request and returns data (usually in JSON format).
+            3. You receive the data and use it in your program.
+
+            📌 Example: get user information from GitHub.
+            import requests
+            response = requests.get("https://api.github.com/users/octocat")
+            data = response.json()
+            print(data["login"])  # octocat
+
+            📌 To work with APIs, you need to install the requests library:
+            pip install requests
+
+            💡 Where it's used: weather, news, maps, social networks, payments.
+
+            🎯 In this lesson, you'll learn to get data from the internet!`,
+                    zh: `API（应用程序接口）就像餐厅的菜单。你不用去厨房——你只需从菜单中选择一道菜，他们就会端上来。API 的工作方式相同：你发送请求，得到准备好的响应。
+
+            📌 工作原理：
+            1. 你编写程序向服务器发送 HTTP 请求。
+            2. 服务器处理请求并返回数据（通常是 JSON 格式）。
+            3. 你接收数据并在程序中使用。
+
+            📌 示例：从 GitHub 获取用户信息。
+            import requests
+            response = requests.get("https://api.github.com/users/octocat")
+            data = response.json()
+            print(data["login"])  # octocat
+
+            📌 要使用 API，需要安装 requests 库：
+            pip install requests
+
+            💡 应用场景：天气、新闻、地图、社交网络、支付。
+
+            🎯 在本课中，你将学习从互联网获取数据！`
+                },
+                example: {
+                    ru: `# Пример работы с API
+            import requests
+            response = requests.get("https://api.github.com/users/octocat")
+            print(response.json()["login"])`,
+                    en: `# API example
+            import requests
+            response = requests.get("https://api.github.com/users/octocat")
+            print(response.json()["login"])`,
+                    zh: `# API 示例
+            import requests
+            response = requests.get("https://api.github.com/users/octocat")
+            print(response.json()["login"])`
+                },
+                isPaid: true,
+                tasks: makeTasks(
+                    { ru: 'Напиши программу, которая получает данные о пользователе с GitHub',
+                        en: 'Write a program that gets user data from GitHub',
+                        zh: '编写程序从 GitHub 获取用户数据',
+                        solution: 'import requests\nresponse = requests.get("https://api.github.com/users/octocat")\nprint(response.json()["login"])',
+                        check: c => c.replace(/\s/g, '').includes('importrequests') && c.replace(/\s/g, '').includes(
+                            'requests.get') },
+                    [
+                        { ru: 'Доп. задача 1 по работе с API', en: 'Bonus task 1 for API integration',
+                            zh: 'API 集成附加任务 1', solution: '# Бонус 1', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 2 по работе с API', en: 'Bonus task 2 for API integration',
+                            zh: 'API 集成附加任务 2', solution: '# Бонус 2', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 3 по работе с API', en: 'Bonus task 3 for API integration',
+                            zh: 'API 集成附加任务 3', solution: '# Бонус 3', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 4 по работе с API', en: 'Bonus task 4 for API integration',
+                            zh: 'API 集成附加任务 4', solution: '# Бонус 4', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 5 по работе с API', en: 'Bonus task 5 for API integration',
+                            zh: 'API 集成附加任务 5', solution: '# Бонус 5', check: c => c.trim().length > 5 },
+                    ]
+                )
+            },
+
+            // ---- УРОК 24: ЧАТ-БОТ ----
+            {
+                id: 24,
+                title: { ru: 'Чат-бот на Python', en: 'Chat Bot with Python', zh: 'Python 聊天机器人' },
+                theory: {
+                    ru: `Чат-бот — это программа, которая умеет общаться с человеком. Она может отвечать на вопросы, шутить, давать советы или просто поддерживать беседу.
+
+            📌 Как создать простого чат-бота:
+            1. Создаёшь словарь с ключевыми словами и возможными ответами.
+            2. Пользователь пишет сообщение.
+            3. Бот ищет ключевое слово в сообщении.
+            4. Если нашёл — отвечает случайным ответом из списка.
+            5. Если не нашёл — говорит "Я не понимаю".
+
+            📌 Пример простого бота:
+            import random
+            responses = {
+                "привет": ["Привет!", "Здравствуй!", "Салют!"],
+                "как дела": ["Хорошо!", "Отлично!", "Нормально!"],
+                "пока": ["Пока!", "До встречи!", "Удачи!"]
+            }
+            def get_response(msg):
+                for key in responses:
+                    if key in msg.lower():
+                        return random.choice(responses[key])
+                return "Я не понимаю, но я учусь!"
+
+            💡 Можно усложнять: добавлять больше слов, использовать библиотеки для распознавания речи.
+
+            🎯 В этом уроке ты создашь своего первого чат-бота!`,
+                    en: `A chat bot is a program that can communicate with a person. It can answer questions, joke, give advice, or just have a conversation.
+
+            📌 How to create a simple chat bot:
+            1. Create a dictionary with keywords and possible responses.
+            2. The user writes a message.
+            3. The bot looks for the keyword in the message.
+            4. If found — responds with a random answer from the list.
+            5. If not found — says "I don't understand".
+
+            📌 Example of a simple bot:
+            import random
+            responses = {
+                "hello": ["Hello!", "Hi!", "Hey!"],
+                "how are you": ["Good!", "Great!", "Fine!"],
+                "bye": ["Bye!", "See you!", "Goodbye!"]
+            }
+            def get_response(msg):
+                for key in responses:
+                    if key in msg.lower():
+                        return random.choice(responses[key])
+                return "I don't understand, but I'm learning!"
+
+            💡 You can make it more advanced: add more words, use speech recognition libraries.
+
+            🎯 In this lesson, you'll create your first chat bot!`,
+                    zh: `聊天机器人是一种能与人类交流的程序。它可以回答问题、开玩笑、提供建议，或只是聊天。
+
+            📌 如何创建简单的聊天机器人：
+            1. 创建包含关键词和可能回复的字典。
+            2. 用户写一条消息。
+            3. 机器人在消息中查找关键词。
+            4. 如果找到——从列表中随机选择一个回复。
+            5. 如果没找到——说"我不理解"。
+
+            📌 简单机器人示例：
+            import random
+            responses = {
+                "你好": ["你好！", "嗨！", "嘿！"],
+                "你怎么样": ["很好！", "很棒！", "不错！"],
+                "再见": ["再见！", "回头见！", "拜拜！"]
+            }
+            def get_response(msg):
+                for key in responses:
+                    if key in msg.lower():
+                        return random.choice(responses[key])
+                return "我不理解，但我在学习！"
+
+            💡 可以更复杂：添加更多词、使用语音识别库。
+
+            🎯 在本课中，你将创建你的第一个聊天机器人！`
+                },
+                example: {
+                    ru: `# Пример чат-бота
+            import random
+            responses = {
+                "привет": ["Привет!", "Здравствуй!"],
+                "как дела": ["Хорошо!", "Отлично!"]
+            }
+            def get_response(msg):
+                for key in responses:
+                    if key in msg.lower():
+                        return random.choice(responses[key])
+                return "Я не понимаю"`,
+                    en: `# Chat bot example
+            import random
+            responses = {
+                "hello": ["Hello!", "Hi!"],
+                "how are you": ["Good!", "Great!"]
+            }
+            def get_response(msg):
+                for key in responses:
+                    if key in msg.lower():
+                        return random.choice(responses[key])
+                return "I don't understand"`,
+                    zh: `# 聊天机器人示例
+            import random
+            responses = {
+                "你好": ["你好！", "嗨！"],
+                "你怎么样": ["很好！", "很棒！"]
+            }
+            def get_response(msg):
+                for key in responses:
+                    if key in msg.lower():
+                        return random.choice(responses[key])
+                return "我不理解"`
+                },
+                isPaid: true,
+                tasks: makeTasks(
+                    { ru: 'Создай чат-бота с тремя ключевыми словами', en: 'Create a chat bot with three keywords',
+                        zh: '创建包含三个关键词的聊天机器人',
+                        solution: 'import random\nresponses = {"hello": ["Hi!"], "bye": ["Bye!"], "help": ["I can help!"]}\ndef get_response(msg):\n    for key in responses:\n        if key in msg.lower():\n            return random.choice(responses[key])\n    return "I don\'t understand"',
+                        check: c => c.replace(/\s/g, '').includes('importrandom') && c.replace(/\s/g, '').includes(
+                            'responses={') },
+                    [
+                        { ru: 'Доп. задача 1 по чат-боту', en: 'Bonus task 1 for chat bot', zh: '聊天机器人附加任务 1',
+                            solution: '# Бонус 1', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 2 по чат-боту', en: 'Bonus task 2 for chat bot', zh: '聊天机器人附加任务 2',
+                            solution: '# Бонус 2', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 3 по чат-боту', en: 'Bonus task 3 for chat bot', zh: '聊天机器人附加任务 3',
+                            solution: '# Бонус 3', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 4 по чат-боту', en: 'Bonus task 4 for chat bot', zh: '聊天机器人附加任务 4',
+                            solution: '# Бонус 4', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 5 по чат-боту', en: 'Bonus task 5 for chat bot', zh: '聊天机器人附加任务 5',
+                            solution: '# Бонус 5', check: c => c.trim().length > 5 },
+                    ]
+                )
+            },
+
+            // ---- УРОК 25: ООП: КЛАССЫ ----
+            {
+                id: 25,
+                title: { ru: 'ООП: Классы и объекты', en: 'OOP: Classes & Objects', zh: 'OOP: 类和对象' },
+                theory: {
+                    ru: `ООП (Объектно-ориентированное программирование) — это способ организации кода, при котором программа строится из объектов. Объект — это как сущность из реального мира: например, "студент", "машина" или "книга".
+
+            📌 Класс — это шаблон, по которому создаются объекты.
+            Представь, что класс — это чертёж дома, а объект — это сам дом.
+
+            📌 Как создать класс:
+            class Student:
+                def __init__(self, name, age):
+                    self.name = name   # атрибут (свойство) объекта
+                    self.age = age
+
+            📌 Как создать объект (экземпляр класса):
+            student1 = Student("Анна", 14)
+
+            📌 Как использовать атрибуты объекта:
+            print(student1.name)   # Анна
+            print(student1.age)    # 14
+
+            📌 Методы — это функции внутри класса:
+            def introduce(self):
+                print(f"Я {self.name}, мне {self.age} лет")
+
+            💡 ООП помогает писать код, который легко понимать, изменять и расширять.
+
+            🎯 В этом уроке ты научишься создавать свои классы и объекты!`,
+                    en: `OOP (Object-Oriented Programming) is a way of organizing code where a program is built from objects. An object is like an entity from the real world: for example, a "student", a "car", or a "book".
+
+            📌 A class is a template for creating objects.
+            Imagine a class is like a house blueprint, and an object is the actual house.
+
+            📌 How to create a class:
+            class Student:
+                def __init__(self, name, age):
+                    self.name = name   # attribute (property) of the object
+                    self.age = age
+
+            📌 How to create an object (instance of a class):
+            student1 = Student("Anna", 14)
+
+            📌 How to use object attributes:
+            print(student1.name)   # Anna
+            print(student1.age)    # 14
+
+            📌 Methods are functions inside a class:
+            def introduce(self):
+                print(f"I'm {self.name}, I'm {self.age} years old")
+
+            💡 OOP helps write code that is easy to understand, change, and expand.
+
+            🎯 In this lesson, you'll learn to create your own classes and objects!`,
+                    zh: `OOP（面向对象编程）是一种通过对象构建程序的代码组织方式。对象就像现实世界中的实体：例如"学生"、"汽车"或"书"。
+
+            📌 类是创建对象的模板。
+            想象类就像房屋蓝图，对象就是实际的房屋。
+
+            📌 如何创建类：
+            class Student:
+                def __init__(self, name, age):
+                    self.name = name   # 对象的属性
+                    self.age = age
+
+            📌 如何创建对象（类的实例）：
+            student1 = Student("安娜", 14)
+
+            📌 如何使用对象属性：
+            print(student1.name)   # 安娜
+            print(student1.age)    # 14
+
+            📌 方法是类内部的函数：
+            def introduce(self):
+                print(f"我是 {self.name}，我 {self.age} 岁")
+
+            💡 OOP 帮助编写易于理解、修改和扩展的代码。
+
+            🎯 在本课中，你将学习创建自己的类和对象！`
+                },
+                example: {
+                    ru: `# Пример класса
+            class Student:
+                def __init__(self, name, age):
+                    self.name = name
+                    self.age = age
+                def introduce(self):
+                    print(f"Я {self.name}, мне {self.age} лет")`,
+                    en: `# Class example
+            class Student:
+                def __init__(self, name, age):
+                    self.name = name
+                    self.age = age
+                def introduce(self):
+                    print(f"I'm {self.name}, I'm {self.age} years old")`,
+                    zh: `# 类示例
+            class Student:
+                def __init__(self, name, age):
+                    self.name = name
+                    self.age = age
+                def introduce(self):
+                    print(f"我是 {self.name}，我 {self.age} 岁")`
+                },
+                isPaid: true,
+                tasks: makeTasks(
+                    { ru: 'Создай класс Student с полями name и age', en: 'Create a Student class with fields name and age',
+                        zh: '创建包含 name 和 age 字段的 Student 类',
+                        solution: 'class Student:\n    def __init__(self, name, age):\n        self.name = name\n        self.age = age',
+                        check: c => c.replace(/\s/g, '').includes('classStudent:') && c.replace(/\s/g, '').includes(
+                            '__init__') },
+                    [
+                        { ru: 'Доп. задача 1 по классам', en: 'Bonus task 1 for classes', zh: '类附加任务 1',
+                            solution: '# Бонус 1', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 2 по классам', en: 'Bonus task 2 for classes', zh: '类附加任务 2',
+                            solution: '# Бонус 2', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 3 по классам', en: 'Bonus task 3 for classes', zh: '类附加任务 3',
+                            solution: '# Бонус 3', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 4 по классам', en: 'Bonus task 4 for classes', zh: '类附加任务 4',
+                            solution: '# Бонус 4', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 5 по классам', en: 'Bonus task 5 for classes', zh: '类附加任务 5',
+                            solution: '# Бонус 5', check: c => c.trim().length > 5 },
+                    ]
+                )
+            },
+
+            // ---- УРОК 26: НАСЛЕДОВАНИЕ ----
+            {
+                id: 26,
+                title: { ru: 'ООП: Наследование', en: 'OOP: Inheritance', zh: 'OOP: 继承' },
+                theory: {
+                    ru: `Наследование — это когда новый класс создаётся на основе уже существующего. Новый класс "наследует" все свойства и методы родителя и может добавить свои.
+
+            📌 Представь: у тебя есть класс "Животное" (Animal) — у него есть имя и возраст. А ты хочешь создать класс "Кошка" (Cat) — она тоже имеет имя и возраст, но ещё умеет мяукать. Вместо того чтобы писать всё заново, ты создаёшь класс "Кошка" на основе класса "Животное".
+
+            📌 Синтаксис:
+            class Animal:
+                def __init__(self, name):
+                    self.name = name
+
+            class Cat(Animal):   # Cat наследует от Animal
+                def __init__(self, name, color):
+                    super().__init__(name)   # вызываем конструктор родителя
+                    self.color = color       # добавляем новый атрибут
+
+            📌 super() — специальная функция, которая вызывает конструктор родительского класса.
+
+            💡 Наследование помогает не повторять один и тот же код и строить сложные системы из простых частей.
+
+            🎯 В этом уроке ты научишься создавать иерархии классов!`,
+                    en: `Inheritance is when a new class is created based on an existing one. The new class "inherits" all properties and methods of the parent and can add its own.
+
+            📌 Imagine: you have a class "Animal" — it has a name and age. You want to create a class "Cat" — it also has a name and age, but it can also meow. Instead of writing everything again, you create "Cat" based on "Animal".
+
+            📌 Syntax:
+            class Animal:
+                def __init__(self, name):
+                    self.name = name
+
+            class Cat(Animal):   # Cat inherits from Animal
+                def __init__(self, name, color):
+                    super().__init__(name)   # call the parent constructor
+                    self.color = color       # add a new attribute
+
+            📌 super() — a special function that calls the parent class constructor.
+
+            💡 Inheritance helps avoid repeating code and build complex systems from simple parts.
+
+            🎯 In this lesson, you'll learn to create class hierarchies!`,
+                    zh: `继承是指基于现有类创建新类。新类"继承"父类的所有属性和方法，并可以添加自己的属性和方法。
+
+            📌 想象：你有一个"动物"类——它有名字和年龄。你想创建一个"猫"类——它也有名字和年龄，但它还能喵喵叫。与其重新写所有代码，你基于"动物"类创建"猫"类。
+
+            📌 语法：
+            class Animal:
+                def __init__(self, name):
+                    self.name = name
+
+            class Cat(Animal):   # Cat 继承自 Animal
+                def __init__(self, name, color):
+                    super().__init__(name)   # 调用父类构造函数
+                    self.color = color       # 添加新属性
+
+            📌 super() — 调用父类构造函数的特殊函数。
+
+            💡 继承帮助避免重复代码，并从简单部分构建复杂系统。
+
+            🎯 在本课中，你将学习创建类层次结构！`
+                },
+                example: {
+                    ru: `# Пример наследования
+            class Person:
+                def __init__(self, name):
+                    self.name = name
+            class Student(Person):
+                def __init__(self, name, grade):
+                    super().__init__(name)
+                    self.grade = grade`,
+                    en: `# Inheritance example
+            class Person:
+                def __init__(self, name):
+                    self.name = name
+            class Student(Person):
+                def __init__(self, name, grade):
+                    super().__init__(name)
+                    self.grade = grade`,
+                    zh: `# 继承示例
+            class Person:
+                def __init__(self, name):
+                    self.name = name
+            class Student(Person):
+                def __init__(self, name, grade):
+                    super().__init__(name)
+                    self.grade = grade`
+                },
+                isPaid: true,
+                tasks: makeTasks(
+                    { ru: 'Создай класс Person с полем name и класс Student, наследующий от Person',
+                        en: 'Create a Person class with field name and a Student class inheriting from Person',
+                        zh: '创建包含 name 字段的 Person 类，以及继承自 Person 的 Student 类',
+                        solution: 'class Person:\n    def __init__(self, name):\n        self.name = name\nclass Student(Person):\n    def __init__(self, name, grade):\n        super().__init__(name)\n        self.grade = grade',
+                        check: c => c.replace(/\s/g, '').includes('classPerson:') && c.replace(/\s/g, '').includes(
+                            'classStudent(Person):') },
+                    [
+                        { ru: 'Доп. задача 1 по наследованию', en: 'Bonus task 1 for inheritance',
+                            zh: '继承附加任务 1', solution: '# Бонус 1', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 2 по наследованию', en: 'Bonus task 2 for inheritance',
+                            zh: '继承附加任务 2', solution: '# Бонус 2', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 3 по наследованию', en: 'Bonus task 3 for inheritance',
+                            zh: '继承附加任务 3', solution: '# Бонус 3', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 4 по наследованию', en: 'Bonus task 4 for inheritance',
+                            zh: '继承附加任务 4', solution: '# Бонус 4', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 5 по наследованию', en: 'Bonus task 5 for inheritance',
+                            zh: '继承附加任务 5', solution: '# Бонус 5', check: c => c.trim().length > 5 },
+                    ]
+                )
+            },
+
+            // ---- УРОК 27: АЛГОРИТМЫ НА ГРАФАХ ----
+            {
+                id: 27,
+                title: { ru: 'Алгоритмы на графах', en: 'Graph Algorithms', zh: '图算法' },
+                theory: {
+                    ru: `Граф — это множество точек (вершин) и линий (рёбер) между ними. Представь карту метро: станции — это вершины, а линии между ними — это рёбра.
+
+            📌 Основные понятия:
+            • Вершина (vertex) — точка в графе (например, станция метро).
+            • Ребро (edge) — соединение между вершинами (линия метро).
+            • Путь (path) — последовательность вершин, соединённых рёбрами.
+
+            📌 Два основных алгоритма обхода графа:
+
+            1. DFS (Depth-First Search, поиск в глубину) — идёт вглубь по одному пути, пока не упрётся в тупик, потом возвращается и идёт по следующему пути.
+
+            2. BFS (Breadth-First Search, поиск в ширину) — проходит слой за слоем: сначала все вершины, соединённые с начальной, потом все, соединённые с ними, и так далее.
+
+            📌 Применение:
+            • Социальные сети — поиск друзей друзей.
+            • Карты — поиск самого короткого пути.
+            • Рекомендации — что ещё может понравиться пользователю.
+
+            🎯 В этом уроке ты научишься обходить графы!`,
+                    en: `A graph is a set of points (vertices) and lines (edges) between them. Imagine a metro map: stations are vertices, and the lines between them are edges.
+
+            📌 Basic concepts:
+            • Vertex — a point in the graph (e.g., a metro station).
+            • Edge — a connection between vertices (a metro line).
+            • Path — a sequence of vertices connected by edges.
+
+            📌 Two main graph traversal algorithms:
+
+            1. DFS (Depth-First Search) — goes deep along one path until it hits a dead end, then goes back and tries another path.
+
+            2. BFS (Breadth-First Search) — goes layer by layer: first all vertices connected to the starting point, then all connected to them, and so on.
+
+            📌 Applications:
+            • Social networks — finding friends of friends.
+            • Maps — finding the shortest path.
+            • Recommendations — what else might a user like.
+
+            🎯 In this lesson, you'll learn to traverse graphs!`,
+                    zh: `图是一组点（顶点）和它们之间的连线（边）。想象地铁地图：车站是顶点，车站之间的线路是边。
+
+            📌 基本概念：
+            • 顶点 — 图中的点（例如地铁站）。
+            • 边 — 顶点之间的连接（地铁线路）。
+            • 路径 — 由边连接的顶点序列。
+
+            📌 两种主要的图遍历算法：
+
+            1. DFS（深度优先搜索）— 沿着一条路径一直走到底，直到遇到死路，然后返回尝试另一条路径。
+
+            2. BFS（广度优先搜索）— 逐层遍历：先访问与起点相连的所有顶点，然后访问与它们相连的所有顶点，依此类推。
+
+            📌 应用：
+            • 社交网络 — 查找朋友的朋友。
+            • 地图 — 查找最短路径。
+            • 推荐 — 用户可能还喜欢什么。
+
+            🎯 在本课中，你将学习遍历图！`
+                },
+                example: {
+                    ru: `# Пример DFS
+            def dfs(graph, node, visited=None):
+                if visited is None:
+                    visited = set()
+                visited.add(node)
+                print(node, end=" ")
+                for neighbor in graph[node]:
+                    if neighbor not in visited:
+                        dfs(graph, neighbor, visited)`,
+                    en: `# DFS example
+            def dfs(graph, node, visited=None):
+                if visited is None:
+                    visited = set()
+                visited.add(node)
+                print(node, end=" ")
+                for neighbor in graph[node]:
+                    if neighbor not in visited:
+                        dfs(graph, neighbor, visited)`,
+                    zh: `# DFS 示例
+            def dfs(graph, node, visited=None):
+                if visited is None:
+                    visited = set()
+                visited.add(node)
+                print(node, end=" ")
+                for neighbor in graph[node]:
+                    if neighbor not in visited:
+                        dfs(graph, neighbor, visited)`
+                },
+                isPaid: true,
+                tasks: makeTasks(
+                    { ru: 'Напиши функцию DFS для обхода графа', en: 'Write a DFS function for graph traversal',
+                        zh: '编写 DFS 函数进行图的遍历',
+                        solution: 'def dfs(graph, node, visited=None):\n    if visited is None:\n        visited = set()\n    visited.add(node)\n    for neighbor in graph[node]:\n        if neighbor not in visited:\n            dfs(graph, neighbor, visited)',
+                        check: c => c.replace(/\s/g, '').includes('defdfs') && c.replace(/\s/g, '').includes(
+                            'forneighboringraph[node]') },
+                    [
+                        { ru: 'Доп. задача 1 по графам', en: 'Bonus task 1 for graphs', zh: '图附加任务 1',
+                            solution: '# Бонус 1', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 2 по графам', en: 'Bonus task 2 for graphs', zh: '图附加任务 2',
+                            solution: '# Бонус 2', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 3 по графам', en: 'Bonus task 3 for graphs', zh: '图附加任务 3',
+                            solution: '# Бонус 3', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 4 по графам', en: 'Bonus task 4 for graphs', zh: '图附加任务 4',
+                            solution: '# Бонус 4', check: c => c.trim().length > 5 },
+                        { ru: 'Доп. задача 5 по графам', en: 'Bonus task 5 for graphs', zh: '图附加任务 5',
+                            solution: '# Бонус 5', check: c => c.trim().length > 5 },
+                    ]
+                )
+            },
+        ];
+
+        // ================================================================
+        //  ОСТАЛЬНАЯ ЛОГИКА (СОСТОЯНИЕ, СОХРАНЕНИЕ, ОТРИСОВКА)
+        // ================================================================
+
+        let текущийУрок = 0;
+        let решенныеЗадачи = LESSONS_DATA.map(l => l.tasks.map(() => false));
+        let очкиОпыта = 0;
+        let достижения = { firstBlood: false, perfectionist: false, speedDemon: false, scholar: false, master: false,
+            supporter: false };
+        let серия = 0;
+        let последнееВремяРешения = 0;
+        let hasPremium = false;
+
+        function loadProgress() {
+            try {
+                const saved = localStorage.getItem('pyforge_progress');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    текущийУрок = data.currentLesson || 0;
+                    решенныеЗадачи = data.completedTasks || LESSONS_DATA.map(l => l.tasks.map(() => false));
+                    очкиОпыта = data.xp || 0;
+                    достижения = data.achievements || { firstBlood: false, perfectionist: false, speedDemon: false,
+                        scholar: false, master: false, supporter: false };
+                    серия = data.streak || 0;
+                    последнееВремяРешения = data.lastTime || 0;
+                    hasPremium = data.hasPremium || false;
+                    return true;
+                }
+            } catch (e) { console.log('Ошибка загрузки прогресса:', e); }
+            return false;
+        }
+
+        function saveProgress() {
+            try {
+                const data = {
+                    currentLesson: текущийУрок,
+                    completedTasks: решенныеЗадачи,
+                    xp: очкиОпыта,
+                    achievements: достижения,
+                    streak: серия,
+                    lastTime: последнееВремяРешения,
+                    hasPremium: hasPremium
+                };
+                localStorage.setItem('pyforge_progress', JSON.stringify(data));
+            } catch (e) { console.log('Ошибка сохранения:', e); }
+        }
+
+        // DOM
+        const langButtons = document.querySelectorAll('#langSwitch button');
+        const nav = document.getElementById('lessonNav');
+        const titleEl = document.getElementById('lessonTitle');
+        const theoryEl = document.getElementById('lessonTheory');
+        const exampleEl = document.getElementById('lessonExample');
+        const tasksContainer = document.getElementById('tasksContainer');
+        const resetBtn = document.getElementById('resetBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const progressFill = document.getElementById('progressFill');
+        const currentNumEl = document.getElementById('currentLessonNum');
+        const totalLessonsEl = document.getElementById('totalLessons');
+        const xpDisplay = document.getElementById('xpDisplay');
+        const mainResult = document.getElementById('mainResult');
+        const aiChat = document.getElementById('aiChat');
+        const aiInput = document.getElementById('aiInput');
+        const aiSendBtn = document.getElementById('aiSendBtn');
+        const lockOverlay = document.getElementById('lockOverlay');
+        const premiumBadge = document.getElementById('premiumBadge');
+        const unlockPremiumBtn = document.getElementById('unlockPremiumBtn');
+        const boostyBtn = document.getElementById('boostyBtn');
+
+        // Язык
+        function setLanguage(lang) {
+            currentLang = lang;
+            langButtons.forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                if (LANG[lang][key] !== undefined) el.textContent = LANG[lang][key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.dataset.i18nPlaceholder;
+                if (LANG[lang][key] !== undefined) el.placeholder = LANG[lang][key];
+            });
+            const welcomeEl = aiChat.querySelector('.ai-message.bot');
+            if (welcomeEl && welcomeEl.dataset.i18n === 'ai_welcome') {
+                welcomeEl.textContent = LANG[lang].ai_welcome;
+            }
+            renderLesson();
+        }
+
+        langButtons.forEach(b => b.addEventListener('click', () => setLanguage(b.dataset.lang)));
+
+        function getLang() { return currentLang; }
+
+        function getText(obj) { return obj[getLang()] || obj.en; }
+
+        function getTaskText(task) { return task['text_' + getLang()] || task.text_en; }
+
+        function isLessonPaid(index) { return LESSONS_DATA[index]?.isPaid || false; }
+
+        // Premium
+        function togglePremium() {
+            if (!hasPremium) {
+                const code = prompt(getLang() === 'zh' ? '输入访问代码（或点击"取消"在 Boosty 上支持）：' :
+                    getLang() === 'ru' ? 'Введите код доступа (или нажмите "Отмена" чтобы поддержать на Boosty):' :
+                    'Enter access code (or click "Cancel" to support on Boosty):');
+                if (code === 'PREMIUM2024') {
+                    hasPremium = true;
+                    updatePremiumUI();
+                    addAIMessage('⭐ ' + (getLang() === 'zh' ? '高级版已解锁！' :
+                        getLang() === 'ru' ? 'Premium разблокирован!' :
+                        'Premium unlocked!'), 'bot');
+                    renderLesson();
+                    saveProgress();
+                } else if (code !== null) {
+                    alert(getLang() === 'zh' ? '代码错误。' :
+                        getLang() === 'ru' ? 'Неверный код.' :
+                        'Invalid code.');
+                }
+            }
+        }
+
+        function updatePremiumUI() {
+            if (hasPremium) {
+                premiumBadge.textContent = '⭐ Premium';
+                premiumBadge.className = 'badge badge-premium unlocked';
+                unlockPremiumBtn.textContent = getLang() === 'zh' ? '✅ 高级版已激活' :
+                    getLang() === 'ru' ? '✅ Premium активен' :
+                    '✅ Premium active';
+                unlockPremiumBtn.className = 'btn-premium unlocked';
+                if (!достижения.supporter) {
+                    достижения.supporter = true;
+                    unlockAchievement('achSupporter', '💜 Supporter');
+                }
+                document.querySelector('.premium-banner .info .text strong').textContent = getLang() === 'zh' ?
+                    '⭐ 高级版已激活！' :
+                    getLang() === 'ru' ? '⭐ Premium активен!' :
+                    '⭐ Premium active!';
+                document.querySelector('.premium-banner .info .text .features').textContent = getLang() === 'zh' ?
+                    '🎉 感谢你的支持！💜' :
+                    getLang() === 'ru' ? '🎉 Спасибо за поддержку! 💜' :
+                    '🎉 Thanks for your support! 💜';
+                saveProgress();
+            }
+        }
+
+        unlockPremiumBtn.addEventListener('click', togglePremium);
+
+        boostyBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = 'https://boosty.to/pylearner';
+            window.open(url, '_blank');
+            setTimeout(() => {
+                if (!hasPremium) {
+                    const answer = confirm(getLang() === 'zh' ? '支持了项目？输入访问代码（问我）！' :
+                        getLang() === 'ru' ? 'Поддержал(а) проект? Введи код доступа (спроси у меня)!' :
+                        'Supported the project? Enter the access code (ask me)!');
+                    if (answer) togglePremium();
+                }
+            }, 1000);
+        });
+
+        // Достижения
+        function updateAchievements() {
+            const total = LESSONS_DATA.reduce((a, l) => a + l.tasks.length, 0);
+            const done = решенныеЗадачи.reduce((a, l) => a + l.filter(v => v).length, 0);
+
+            if (done >= 1 && !достижения.firstBlood) {
+                достижения.firstBlood = true;
+                unlockAchievement('achFirstBlood', '⚡ First Blood');
+            }
+            if (решенныеЗадачи.some(tasks => tasks.every(v => v === true)) && !достижения.perfectionist) {
+                достижения.perfectionist = true;
+                unlockAchievement('achPerfectionist', '💎 Perfectionist');
+            }
+            if (done >= 30 && !достижения.scholar) {
+                достижения.scholar = true;
+                unlockAchievement('achScholar', '📖 Scholar');
+            }
+            if (done === total && !достижения.master) {
+                достижения.master = true;
+                unlockAchievement('achMaster', '👑 Master');
+            }
+            очкиОпыта = done * 10 + (достижения.master ? 200 : 0) + (достижения.scholar ? 50 : 0);
+            xpDisplay.textContent = очкиОпыта;
+            saveProgress();
+        }
+
+        function unlockAchievement(elId, name) {
+            const el = document.getElementById(elId);
+            if (el) { el.classList.add('unlocked');
+                el.innerHTML = el.innerHTML + ' ✨'; }
+            addAIMessage(`🏆 ${name} unlocked!`, 'bot');
+        }
+
+        // AI
+        function generateHint(lessonIdx, taskIdx) {
+            const hints = getLang() === 'zh' ? ['检查语法', '看示例', '再试一次', '检查引号', '检查空格'] :
+                getLang() === 'ru' ? ['Проверь синтаксис', 'Посмотри на пример', 'Попробуй ещё раз', 'Убедись в кавычках',
+                    'Проверь пробелы'
+                ] :
+                ['Check syntax', 'Look at the example', 'Try again', 'Check quotes', 'Check spaces'];
+            return hints[taskIdx % hints.length];
+        }
+
+        function addAIMessage(text, sender) {
+            const div = document.createElement('div');
+            div.className = `ai-message ${sender}`;
+            div.innerHTML = text;
+            aiChat.appendChild(div);
+            aiChat.scrollTop = aiChat.scrollHeight;
+        }
+
+        function handleAIQuery(query) {
+            const q = query.toLowerCase().trim();
+            addAIMessage(q, 'user');
+            if (q.includes('hint') || q.includes('подсказк') || q.includes('提示')) {
+                const idx = LESSONS_DATA[текущийУрок].tasks.findIndex((_, i) => !решенныеЗадачи[текущийУрок][i]);
+                const taskIdx = idx !== -1 ? idx : 0;
+                addAIMessage(`💡 ${generateHint(текущийУрок, taskIdx)}`, 'bot');
+                return;
+            }
+            addAIMessage(getLang() === 'zh' ? '🤔 问：计划、提示、解释或代码帮助。' :
+                getLang() === 'ru' ? '🤔 Спрашивай: план, подсказку, объяснение, или помощь с кодом.' :
+                '🤔 Ask for: plan, hint, explanation, or code help.', 'bot');
+        }
+
+        // Отрисовка
+        function renderNav() {
+            nav.innerHTML = '';
+            LESSONS_DATA.forEach((lesson, index) => {
+                const btn = document.createElement('button');
+                const isPaid = lesson.isPaid || false;
+                const unlocked = !isPaid || hasPremium;
+                btn.textContent = `${index+1}`;
+                btn.title = getText(lesson.title);
+                btn.dataset.index = index;
+                if (index === текущийУрок) btn.classList.add('active');
+                const allDone = решенныеЗадачи[index] && решенныеЗадачи[index].every(v => v === true);
+                if (allDone) btn.classList.add('done');
+                if (isPaid && !hasPremium) btn.classList.add('locked');
+                btn.addEventListener('click', () => {
+                    if (isPaid && !hasPremium) {
+                        alert(getLang() === 'zh' ? '🔒 高级课程。在 Boosty 上支持项目！' :
+                            getLang() === 'ru' ? '🔒 Premium урок. Поддержи проект на Boosty!' :
+                            '🔒 Premium lesson. Support on Boosty!');
+                        return;
+                    }
+                    goToLesson(index);
+                });
+                nav.appendChild(btn);
+            });
+            totalLessonsEl.textContent = LESSONS_DATA.length;
+            currentNumEl.textContent = текущийУрок + 1;
+        }
+
+        function renderLesson() {
+            const lesson = LESSONS_DATA[текущийУрок];
+            const isPaid = lesson.isPaid || false;
+
+            titleEl.textContent = getText(lesson.title);
+            theoryEl.textContent = getText(lesson.theory);
+            exampleEl.textContent = getText(lesson.example);
+
+            if (isPaid && !hasPremium) {
+                lockOverlay.style.display = 'block';
+                lockOverlay.innerHTML = `
+                    <div class="lock-overlay">
+                        <div class="lock-icon">🔒</div>
+                        <p><strong>${getLang() === 'zh' ? '高级课程' : getLang() === 'ru' ? 'Premium-урок' : 'Premium Lesson'}</strong></p>
+                        <p>${getLang() === 'zh' ? '在 Boosty 上支持项目！' : getLang() === 'ru' ? 'Поддержи проект на Boosty!' : 'Support the project on Boosty!'}</p>
+                        <br>
+                        <button class="btn btn-premium" onclick="togglePremium()">⭐ ${getLang() === 'zh' ? '解锁高级版' : getLang() === 'ru' ? 'Разблокировать Premium' : 'Unlock Premium'}</button>
+                    </div>
+                `;
+                tasksContainer.innerHTML = '';
+                nextBtn.disabled = true;
+            } else {
+                lockOverlay.style.display = 'none';
+                renderTasks(lesson);
+                const mainDone = решенныеЗадачи[текущийУрок] && решенныеЗадачи[текущийУрок][0];
+                if (mainDone) {
+                    nextBtn.disabled = false;
+                    const allDone = решенныеЗадачи[текущийУрок] && решенныеЗадачи[текущийУрок].every(v => v === true);
+                    showMainResult('success', allDone ? '🎉 ' + (getLang() === 'zh' ? '所有任务都完成了！' :
+                        getLang() === 'ru' ? 'Все задачи решены!' :
+                        'All tasks done!') : '✅ ' + (getLang() === 'zh' ? '必做任务完成了！' :
+                        getLang() === 'ru' ? 'Обязательная задача решена!' :
+                        'Main task done!'));
+                } else {
+                    nextBtn.disabled = true;
+                    hideMainResult();
+                }
+            }
+
+            updateProgress();
+            renderNav();
+            updateAchievements();
+            updatePremiumUI();
+            saveProgress();
+        }
+
+        function renderTasks(lesson) {
+            tasksContainer.innerHTML = '';
+            lesson.tasks.forEach((task, idx) => {
+                const isBonus = idx > 0;
+                const isDone = решенныеЗадачи[текущийУрок] && решенныеЗадачи[текущийУрок][idx];
+
+                const div = document.createElement('div');
+                div.className = `task-item ${isBonus ? 'bonus' : ''} ${isDone ? 'completed' : ''}`;
+
+                const header = document.createElement('div');
+                header.className = 'task-header';
+                const textSpan = document.createElement('span');
+                textSpan.className = 'task-text';
+                textSpan.textContent = getTaskText(task);
+                header.appendChild(textSpan);
+
+                const status = document.createElement('span');
+                status.className = `task-status ${isDone ? 'done' : ''} ${isBonus ? 'bonus-label' : ''}`;
+                status.textContent = isDone ? LANG[getLang()].done : (isBonus ? LANG[getLang()].bonus : LANG[getLang()]
+                    .required);
+                header.appendChild(status);
+                div.appendChild(header);
+
+                const input = document.createElement('textarea');
+                input.className = 'task-input';
+                input.placeholder = isBonus ? LANG[getLang()].write_code_optional : LANG[getLang()].write_code;
+                input.disabled = isDone;
+                if (isDone) input.value = task.solution;
+                div.appendChild(input);
+
+                const actions = document.createElement('div');
+                actions.className = 'task-actions';
+
+                const checkBtn = document.createElement('button');
+                checkBtn.className = 'btn-sm primary';
+                checkBtn.textContent = LANG[getLang()].check;
+                checkBtn.disabled = isDone;
+                checkBtn.addEventListener('click', () => {
+                    if (isDone) return;
+                    const userCode = input.value.trim();
+                    if (!userCode) { showTaskResult(div, 'error', LANG[getLang()].write_something); return; }
+                    const isCorrect = task.check(userCode);
+                    if (isCorrect) {
+                        if (!решенныеЗадачи[текущийУрок]) решенныеЗадачи[текущийУрок] = [];
+                        решенныеЗадачи[текущийУрок][idx] = true;
+                        renderLesson();
+                        showTaskResult(div, 'success', LANG[getLang()].correct);
+                        addAIMessage(`${LANG[getLang()].task_done_ai} ${idx+1}! ${LANG[getLang()].keep_going}`,
+                        'bot');
+                        saveProgress();
+                    } else {
+                        showTaskResult(div, 'error', LANG[getLang()].wrong);
+                    }
+                });
+                actions.appendChild(checkBtn);
+
+                const hintBtn = document.createElement('button');
+                hintBtn.className = 'btn-sm ai-hint';
+                hintBtn.textContent = LANG[getLang()].ai_hint;
+                hintBtn.addEventListener('click', () => {
+                    const hint = generateHint(текущийУрок, idx);
+                    showTaskResult(div, 'hint', '💡 ' + hint);
+                });
+                actions.appendChild(hintBtn);
+
+                const resetTaskBtn = document.createElement('button');
+                resetTaskBtn.className = 'btn-sm secondary';
+                resetTaskBtn.textContent = LANG[getLang()].reset_task;
+                resetTaskBtn.addEventListener('click', () => {
+                    if (isDone && idx === 0) { showTaskResult(div, 'error', LANG[getLang()].cant_reset); return; }
+                    if (isDone) {
+                        if (!решенныеЗадачи[текущийУрок]) решенныеЗадачи[текущийУрок] = [];
+                        решенныеЗадачи[текущийУрок][idx] = false;
+                        renderLesson();
+                        saveProgress();
+                        return;
+                    }
+                    input.value = '';
+                    hideTaskResult(div);
+                });
+                actions.appendChild(resetTaskBtn);
+
+                div.appendChild(actions);
+                const result = document.createElement('div');
+                result.className = 'task-result';
+                div.appendChild(result);
+                tasksContainer.appendChild(div);
+            });
+        }
+
+        function showTaskResult(container, type, message) {
+            const r = container.querySelector('.task-result');
+            r.className = `task-result show ${type}`;
+            r.innerHTML = message;
+        }
+
+        function hideTaskResult(container) {
+            const r = container.querySelector('.task-result');
+            r.className = 'task-result';
+            r.innerHTML = '';
+        }
+
+        function showMainResult(type, message) {
+            mainResult.className = `main-result show ${type}`;
+            mainResult.textContent = message;
+        }
+
+        function hideMainResult() {
+            mainResult.className = 'main-result';
+            mainResult.textContent = '';
+        }
+
+        function updateProgress() {
+            const total = LESSONS_DATA.reduce((a, l) => a + l.tasks.length, 0);
+            const done = решенныеЗадачи.reduce((a, l) => a + (l ? l.filter(v => v).length : 0), 0);
+            progressFill.style.width = (done / total) * 100 + '%';
+        }
+
+        function goToLesson(index) {
+            if (index < 0 || index >= LESSONS_DATA.length) return;
+            const lesson = LESSONS_DATA[index];
+            if (lesson.isPaid && !hasPremium) {
+                alert(getLang() === 'zh' ? '🔒 高级课程。在 Boosty 上支持项目！' :
+                    getLang() === 'ru' ? '🔒 Premium урок. Поддержи проект на Boosty!' :
+                    '🔒 Premium lesson. Support on Boosty!');
+                return;
+            }
+            текущийУрок = index;
+            hideMainResult();
+            renderLesson();
+            document.querySelector('.app').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function resetAll() {
+            const msg = getLang() === 'zh' ? '重置所有进度？' :
+                getLang() === 'ru' ? 'Сбросить весь прогресс?' :
+                'Reset all progress?';
+            if (confirm(msg)) {
+                решенныеЗадачи = LESSONS_DATA.map(l => l.tasks.map(() => false));
+                достижения = { firstBlood: false, perfectionist: false, speedDemon: false, scholar: false,
+                master: false, supporter: false };
+                серия = 0;
+                последнееВремяРешения = 0;
+                document.querySelectorAll('.achievement').forEach(el => el.classList.remove('unlocked'));
+                текущийУрок = 0;
+                hideMainResult();
+                renderLesson();
+                renderNav();
+                updateProgress();
+                updateAchievements();
+                saveProgress();
+                addAIMessage(getLang() === 'zh' ? '🔄 进度已重置。' :
+                    getLang() === 'ru' ? '🔄 Прогресс сброшен.' :
+                    '🔄 Progress reset.', 'bot');
+            }
+        }
+
+        function nextLesson() {
+            if (nextBtn.disabled) return;
+            const next = текущийУрок + 1;
+            if (next >= LESSONS_DATA.length) {
+                showMainResult('success', getLang() === 'zh' ?
+                    '🏆 恭喜你！你完成了全部 28 课！👑' :
+                    getLang() === 'ru' ?
+                    '🏆 ПОЗДРАВЛЯЮ! Ты прошел(а) все 28 уроков! 👑' :
+                    '🏆 CONGRATULATIONS! You completed all 28 lessons! 👑');
+                nextBtn.disabled = true;
+                addAIMessage('🎉🎉🎉 ' + (getLang() === 'zh' ? '你完成了全部课程！' :
+                    getLang() === 'ru' ? 'Ты прошел(а) всё!' :
+                    'You completed everything!'), 'bot');
+                return;
+            }
+            if (LESSONS_DATA[next].isPaid && !hasPremium) {
+                alert(getLang() === 'zh' ? '🔒 高级课程。在 Boosty 上支持项目！' :
+                    getLang() === 'ru' ? '🔒 Premium урок. Поддержи проект на Boosty!' :
+                    '🔒 Premium lesson. Support on Boosty!');
+                return;
+            }
+            текущийУрок = next;
+            hideMainResult();
+            renderLesson();
+            addAIMessage(`📚 ${getLang() === 'zh' ? '进入下一课' : getLang() === 'ru' ? 'Переходим к уроку' : 'Moving to lesson'} ${next+1}`, 'bot');
+            document.querySelector('.app').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        document.querySelectorAll('[data-hint]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.dataset.hint;
+                const map = {
+                    'hint': getLang() === 'zh' ? '给我提示' : getLang() === 'ru' ? 'Дай подсказку' : 'Give me a hint',
+                    'explain': getLang() === 'zh' ? '解释' : getLang() === 'ru' ? 'Объясни' : 'Explain',
+                    'plan': getLang() === 'zh' ? '帮我学习 Python，我知道变量' :
+                        getLang() === 'ru' ? 'Помоги изучить Python, я знаю переменные' :
+                        'Help me learn Python, I know variables',
+                    'fix': getLang() === 'zh' ? '我的代码有错误，帮我修复' :
+                        getLang() === 'ru' ? 'Мой код с ошибкой, помоги' :
+                        'My code has an error, help'
+                };
+                const msg = map[type] || '';
+                aiInput.value = msg;
+                handleAIQuery(msg);
+                aiInput.value = '';
+            });
+        });
+
+        aiSendBtn.addEventListener('click', () => {
+            const q = aiInput.value.trim();
+            if (!q) return;
+            handleAIQuery(q);
+            aiInput.value = '';
+        });
+
+        aiInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault();
+                aiSendBtn.click(); }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'R') { e.preventDefault();
+                resetAll(); }
+        });
+
+        window.togglePremium = togglePremium;
+
+        function init() {
+            loadProgress();
+            const browserLang = navigator.language || 'en';
+            const defaultLang = browserLang.startsWith('ru') ? 'ru' : browserLang.startsWith('zh') ? 'zh' : 'en';
+            setLanguage(defaultLang);
+            renderNav();
+            renderLesson();
+            updateProgress();
+            updateAchievements();
+            updatePremiumUI();
+            addAIMessage(getLang() === 'zh' ?
+                '👋 你好！进度会自动保存！' :
+                getLang() === 'ru' ?
+                '👋 Привет! Прогресс сохраняется автоматически!' :
+                '👋 Hi! Progress is saved automatically!', 'bot');
+            console.log('⚔️ PyForge loaded!');
+            console.log('📚 28 lessons (20 free, 8 premium)');
+            console.log('🌍 3 languages: RU, EN, ZH');
+            console.log('💾 Progress saved in localStorage');
+            console.log('❤️ Made by Sonya');
+        }
+
+        init();
+    </script>
+</body>
+</html>

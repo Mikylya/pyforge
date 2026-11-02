@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>PyLearner — учи Python</title>
+    <style>
+        /* ===== ОБЩИЕ СТИЛИ ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .app {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #1e293b;
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        /* ===== ШАПКА ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .progress-badge {
+            background: #334155;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+        .progress-badge span {
+            color: #60a5fa;
+            font-weight: 700;
+        }
+
+        /* ===== НАВИГАЦИЯ ПО УРОКАМ ===== */
+        .lesson-nav {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: nowrap;
+            scrollbar-width: thin;
+        }
+        .lesson-nav button {
+            background: #334155;
+            border: none;
+            color: #94a3b8;
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: 0.2s;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+        .lesson-nav button.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .lesson-nav button.done {
+            border: 2px solid #22c55e;
+        }
+        .lesson-nav button:hover:not(.active) {
+            background: #475569;
+            color: white;
+        }
+
+        /* ===== КОНТЕНТ УРОКА ===== */
+        .lesson-content {
+            background: #0f172a;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .lesson-content h2 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+            color: #f1f5f9;
+        }
+        .lesson-content .theory {
+            color: #cbd5e1;
+            line-height: 1.7;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+        .lesson-content .theory code {
+            background: #1e293b;
+            padding: 0.1rem 0.5rem;
+            border-radius: 6px;
+            color: #a78bfa;
+            font-size: 0.9rem;
+        }
+        .lesson-content .example {
+            background: #1e293b;
+            border-left: 4px solid #3b82f6;
+            padding: 0.8rem 1rem;
+            border-radius: 0 8px 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-bottom: 1rem;
+            color: #e2e8f0;
+        }
+
+        /* ===== РЕДАКТОР КОДА ===== */
+        .code-editor {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .code-editor textarea {
+            width: 100%;
+            min-height: 120px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            padding: 0.8rem;
+            resize: vertical;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .code-editor textarea:focus {
+            border-color: #3b82f6;
+        }
+
+        /* ===== КНОПКИ ===== */
+        .actions {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .btn {
+            padding: 0.6rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #16a34a;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: #334155;
+            color: #94a3b8;
+        }
+        .btn-secondary:hover {
+            background: #475569;
+            color: white;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ===== РЕЗУЛЬТАТ ===== */
+        .result {
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .result.success {
+            display: block;
+            background: #064e3b;
+            border: 1px solid #22c55e;
+            color: #86efac;
+        }
+        .result.error {
+            display: block;
+            background: #7f1d1d;
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+        }
+        .result.show {
+            display: block;
+        }
+
+        /* ===== ПРОГРЕСС-БАР ===== */
+        .progress-bar-wrap {
+            background: #334155;
+            border-radius: 20px;
+            height: 6px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+        .progress-bar-wrap .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #a78bfa);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 20px;
+        }
+
+        /* ===== АДАПТИВ ===== */
+        @media (max-width: 600px) {
+            .app {
+                padding: 1rem;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .lesson-content {
+                padding: 1rem;
+            }
+            .code-editor textarea {
+                min-height: 100px;
+                font-size: 0.8rem;
+            }
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app" id="app">
+        <!-- ШАПКА -->
+        <div class="header">
+            <h1>🐍 PyLearner</h1>
+            <div class="progress-badge">Урок <span id="currentLessonNum">1</span> / <span id="totalLessons">5</span></div>
+        </div>
+
+        <!-- НАВИГАЦИЯ -->
+        <div class="lesson-nav" id="lessonNav"></div>
+
+        <!-- КОНТЕНТ УРОКА -->
+        <div class="lesson-content" id="lessonContent">
+            <h2 id="lessonTitle">Переменные</h2>
+            <div class="theory" id="lessonTheory"></div>
+            <div class="example" id="lessonExample"></div>
+        </div>
+
+        <!-- РЕДАКТОР КОДА -->
+        <div class="code-editor">
+            <textarea id="codeInput" placeholder="Напиши свой код здесь..."></textarea>
+        </div>
+
+        <!-- КНОПКИ -->
+        <div class="actions">
+            <button class="btn btn-primary" id="checkBtn">▶ Проверить</button>
+            <button class="btn btn-secondary" id="resetBtn">↺ Сбросить</button>
+            <button class="btn btn-success" id="nextBtn" disabled>→ Следующий урок</button>
+        </div>
+
+        <!-- РЕЗУЛЬТАТ -->
+        <div class="result" id="result"></div>
+
+        <!-- ПРОГРЕСС-БАР -->
+        <div class="progress-bar-wrap">
+            <div class="fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // ДАННЫЕ УРОКОВ (можно легко расширять!)
+        // ============================================================
+        const lessons = [{
+            id: 0,
+            title: 'Переменные',
+            theory: `В Python переменная — это контейнер для данных. Ты можешь сохранить в неё число, текст или что угодно.\n\n📌 <code>имя_переменной = значение</code>\n\n👉 Попробуй создать переменную <code>name</code> со значением <code>"Анна"</code>.`,
+            example: `# Пример\nname = "Анна"\nprint(name)`,
+            task: 'Создай переменную name со значением "Анна"',
+            solution: 'name = "Анна"',
+            check: (code) => {
+                const cleaned = code.replace(/\s/g, '');
+                return cleaned.includes('name="Анна"') || cleaned.includes('name="Анна"');
+            }
+        }, {
+            id: 1,
+            title: 'Типы данных',
+            theory: `В Python есть разные типы данных:\n• <code>str</code> — текст (в кавычках)\n• <code>int</code> — целые числа\n• <code>float</code> — числа с точкой\n• <code>bool</code> — True / False\n\n👉 Создай переменную <code>age</code> с числом <code>14</code>.`,
+            example: `# Пример\nname = "Анна"  # str\nage = 14        # int\nheight = 1.65   # float\nis_student = True  # bool`,
+            task: 'Создай переменную age со значением 14 (число, без кавычек)',
+            solution: 'age = 14',
+            check: (code) => {
+                const cleaned = code.replace(/\s/g, '');
+                return cleaned.includes('age=14');
+            }
+        }, {
+            id: 2,
+            title: 'Условия (if)',
+            theory: `Условия помогают программе принимать решения.\n\n📌 <code>if условие:</code>\n    <code>делаем что-то</code>\n\n👉 Напиши код: если <code>x > 5</code>, то напечатай <code>"Больше пяти"</code>.`,
+            example: `# Пример\nx = 10\nif x > 5:\n    print("Больше пяти")`,
+            task: 'Напиши: if x > 5: print("Больше пяти")',
+            solution: 'if x > 5:\n    print("Больше пяти")',
+            check: (code) => {
+                const cleaned = code.replace(/\s/g, '');
+                return cleaned.includes('ifx>5:') && cleaned.includes('print("Большепяти")');
+            }
+        }, {
+            id: 3,
+            title: 'Циклы (for)',
+            theory: `Циклы повторяют код несколько раз.\n\n📌 <code>for i in range(3):</code>\n    <code>print(i)</code>\n\n👉 Напиши цикл, который напечатает числа от 0 до 2.`,
+            example: `# Пример\nfor i in range(3):\n    print(i)`,
+            task: 'Напиши: for i in range(3): print(i)',
+            solution: 'for i in range(3):\n    print(i)',
+            check: (code) => {
+                const cleaned = code.replace(/\s/g, '');
+                return cleaned.includes('foriinrange(3):') && cleaned.includes('print(i)');
+            }
+        }, {
+            id: 4,
+            title: 'Функции (def)',
+            theory: `Функции — это "кирпичики" кода, которые можно переиспользовать.\n\n📌 <code>def имя(параметры):</code>\n    <code>return результат</code>\n\n👉 Создай функцию <code>hello()</code>, которая печатает <code>"Привет!"</code>.`,
+            example: `# Пример\ndef hello():\n    print("Привет!")`,
+            task: 'Создай функцию def hello(): print("Привет!")',
+            solution: 'def hello():\n    print("Привет!")',
+            check: (code) => {
+                const cleaned = code.replace(/\s/g, '');
+                return cleaned.includes('defhello():') && cleaned.includes('print("Привет!")');
+            }
+        }];
+
+        // ============================================================
+        // СОСТОЯНИЕ ПРИЛОЖЕНИЯ
+        // ============================================================
+        let currentLesson = 0;
+        let completed = new Array(lessons.length).fill(false);
+        let isCompleted = false;
+
+        // ============================================================
+        // DOM-ЭЛЕМЕНТЫ
+        // ============================================================
+        const nav = document.getElementById('lessonNav');
+        const title = document.getElementById('lessonTitle');
+        const theory = document.getElementById('lessonTheory');
+        const example = document.getElementById('lessonExample');
+        const codeInput = document.getElementById('codeInput');
+        const checkBtn = document.getElementById('checkBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const resultDiv = document.getElementById('result');
+        const progressFill = document.getElementById('progressFill');
+        const currentNum = document.getElementById('currentLessonNum');
+        const totalLessons = document.getElementById('totalLessons');
+
+        // ============================================================
+        // ФУНКЦИИ ОТОБРАЖЕНИЯ
+        // ============================================================
+        function renderNav() {
+            nav.innerHTML = '';
+            lessons.forEach((lesson, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = `${index + 1}. ${lesson.title}`;
+                btn.dataset.index = index;
+                if (index === currentLesson) btn.classList.add('active');
+                if (completed[index]) btn.classList.add('done');
+                btn.addEventListener('click', () => {
+                    if (completed[index] || index === currentLesson) {
+                        goToLesson(index);
+                    } else {
+                        showResult('error', 'Сначала заверши текущий урок!');
+                    }
+                });
+                nav.appendChild(btn);
+            });
+            totalLessons.textContent = lessons.length;
+            currentNum.textContent = currentLesson + 1;
+        }
+
+        function renderLesson() {
+            const lesson = lessons[currentLesson];
+            title.textContent = lesson.title;
+            theory.innerHTML = lesson.theory;
+            example.textContent = lesson.example || '';
+
+            // Если урок уже завершён, показываем код-подсказку
+            if (completed[currentLesson]) {
+                codeInput.value = lesson.solution;
+                codeInput.disabled = true;
+                checkBtn.disabled = true;
+                nextBtn.disabled = false;
+                showResult('success', '✅ Отлично! Урок пройден. Иди дальше!');
+            } else {
+                // Если это начатый урок, очищаем поле (но не сбрасываем, если там что-то есть)
+                if (!codeInput.dataset.saved) {
+                    // Если поле пустое, ставим заготовку
+                    if (!codeInput.value) {
+                        // Можно оставить пустым или дать подсказку
+                    }
+                }
+                codeInput.disabled = false;
+                checkBtn.disabled = false;
+                nextBtn.disabled = true;
+                // Не скрываем результат, если он был показан
+                // resultDiv.className = 'result';
+                // resultDiv.textContent = '';
+            }
+            currentNum.textContent = currentLesson + 1;
+            updateProgress();
+            renderNav();
+        }
+
+        function updateProgress() {
+            const done = completed.filter(v => v).length;
+            const total = lessons.length;
+            const percent = (done / total) * 100;
+            progressFill.style.width = percent + '%';
+        }
+
+        function showResult(type, message) {
+            resultDiv.className = 'result show ' + type;
+            resultDiv.textContent = message;
+        }
+
+        function hideResult() {
+            resultDiv.className = 'result';
+            resultDiv.textContent = '';
+        }
+
+        // ============================================================
+        // ЛОГИКА ПРИЛОЖЕНИЯ
+        // ============================================================
+        function goToLesson(index) {
+            if (index < 0 || index >= lessons.length) return;
+            if (index === currentLesson) {
+                renderLesson();
+                return;
+            }
+            // Можно переключаться только на пройденные или текущий
+            if (!completed[index] && index !== currentLesson) {
+                showResult('error', '🔒 Сначала заверши этот урок!');
+                return;
+            }
+            currentLesson = index;
+            hideResult();
+            // Очищаем сохранённое состояние для нового урока
+            delete codeInput.dataset.saved;
+            renderLesson();
+        }
+
+        function checkCode() {
+            if (completed[currentLesson]) {
+                showResult('success', 'Этот урок уже пройден! Иди дальше.');
+                return;
+            }
+
+            const userCode = codeInput.value.trim();
+            if (!userCode) {
+                showResult('error', '✏️ Напиши код в редакторе!');
+                return;
+            }
+
+            const lesson = lessons[currentLesson];
+            const isCorrect = lesson.check(userCode);
+
+            if (isCorrect) {
+                completed[currentLesson] = true;
+                codeInput.disabled = true;
+                checkBtn.disabled = true;
+                nextBtn.disabled = false;
+                showResult('success', '🎉 Правильно! Ты справилась! Нажми "Следующий урок".');
+                renderNav();
+                updateProgress();
+
+                // Поздравление, если все уроки пройдены
+                if (completed.every(v => v === true)) {
+                    setTimeout(() => {
+                        showResult('success', '🏆 ПОЗДРАВЛЯЮ! Ты прошла ВСЕ уроки PyLearner! Ты — настоящий программист!');
+                    }, 500);
+                }
+            } else {
+                showResult('error', '❌ Не совсем. Проверь синтаксис: кавычки, пробелы, точки с запятой не нужны. Попробуй ещё раз.');
+            }
+        }
+
+        function resetCode() {
+            if (completed[currentLesson]) {
+                // Если урок пройден, сброс только через кнопку "Сбросить прогресс" (добавим позже)
+                showResult('error', 'Этот урок уже пройден, его нельзя сбросить.');
+                return;
+            }
+            const lesson = lessons[currentLesson];
+            codeInput.value = '';
+            hideResult();
+            codeInput.focus();
+            // Убираем сохранённое состояние
+            delete codeInput.dataset.saved;
+        }
+
+        function nextLesson() {
+            if (!completed[currentLesson]) {
+                showResult('error', 'Сначала проверь свой код!');
+                return;
+            }
+
+            const nextIndex = currentLesson + 1;
+            if (nextIndex >= lessons.length) {
+                showResult('success', '🎉 Ты прошел(а) ВСЕ уроки! Ты молодец!');
+                nextBtn.disabled = true;
+                return;
+            }
+
+            currentLesson = nextIndex;
+            hideResult();
+            delete codeInput.dataset.saved;
+            renderLesson();
+            // Прокручиваем к началу
+            document.querySelector('.app').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Сохраняем код при вводе, чтобы не терять
+        codeInput.addEventListener('input', () => {
+            if (!completed[currentLesson]) {
+                codeInput.dataset.saved = 'true';
+            }
+        });
+
+        // ============================================================
+        // КНОПКА "СБРОСИТЬ ВСЁ" (для тестирования)
+        // ============================================================
+        // Можно добавить скрытую функцию: зажать Ctrl+Shift+R для сброса прогресса
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+                if (confirm('Сбросить весь прогресс?')) {
+                    completed = new Array(lessons.length).fill(false);
+                    currentLesson = 0;
+                    codeInput.disabled = false;
+                    checkBtn.disabled = false;
+                    nextBtn.disabled = true;
+                    codeInput.value = '';
+                    hideResult();
+                    renderLesson();
+                    renderNav();
+                    updateProgress();
+                    showResult('success', '🔄 Прогресс сброшен. Начинай заново!');
+                }
+            }
+        });
+
+        // ============================================================
+        // ИНИЦИАЛИЗАЦИЯ
+        // ============================================================
+        function init() {
+            renderNav();
+            renderLesson();
+            updateProgress();
+
+            // Обработчики событий
+            checkBtn.addEventListener('click', checkCode);
+            resetBtn.addEventListener('click', resetCode);
+            nextBtn.addEventListener('click', nextLesson);
+
+            // Ввод с клавиатуры: Ctrl+Enter для проверки
+            codeInput.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    checkCode();
+                }
+            });
+
+            console.log('🐍 PyLearner загружен!');
+            console.log('💡 Подсказка: Ctrl+Shift+R для сброса прогресса');
+        }
+
+        // Запускаем
+        init();
+    </script>
+
+</body>
+</html>

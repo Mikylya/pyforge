@@ -1,0 +1,2296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>PyLearner — Learn Python with AI</title>
+    <style>
+        /* ========================================================
+           СТИЛИ — Я ИХ ПЕРЕПИСЫВАЛА 3 РАЗА, ПОКА НЕ ПОНРАВИЛОСЬ
+           Сейчас нравится, но может, потом поменяю на тёмно-зелёный?
+           ======================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .app {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #1e293b;
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .header-left h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+        .lang-switch {
+            display: flex;
+            gap: 0.2rem;
+            background: #0f172a;
+            border-radius: 30px;
+            padding: 0.15rem;
+            border: 1px solid #334155;
+        }
+        .lang-switch button {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .lang-switch button.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .lang-switch button:hover:not(.active) {
+            color: white;
+        }
+        .badge {
+            background: #334155;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        .badge span {
+            color: #60a5fa;
+            font-weight: 700;
+        }
+        .achievements-bar {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            background: #0f172a;
+            padding: 0.5rem 1rem;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+        .achievements-bar .label {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            margin-right: 0.3rem;
+        }
+        .achievement {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            background: #1e293b;
+            padding: 0.15rem 0.6rem 0.15rem 0.3rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            border: 1px solid #334155;
+            transition: 0.3s;
+        }
+        .achievement.unlocked {
+            border-color: #fbbf24;
+            color: #fbbf24;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.12);
+        }
+        .achievement .icon {
+            font-size: 1rem;
+        }
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 1.5rem;
+        }
+        @media (max-width: 800px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .lesson-nav {
+            display: flex;
+            gap: 0.4rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.2rem;
+            flex-wrap: nowrap;
+            scrollbar-width: thin;
+        }
+        .lesson-nav button {
+            background: #334155;
+            border: none;
+            color: #94a3b8;
+            padding: 0.3rem 0.8rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: 0.2s;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+        .lesson-nav button.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .lesson-nav button.done {
+            border: 2px solid #22c55e;
+        }
+        .lesson-nav button:hover:not(.active) {
+            background: #475569;
+            color: white;
+        }
+        .lesson-content {
+            background: #0f172a;
+            border-radius: 16px;
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+        .lesson-content h2 {
+            font-size: 1.2rem;
+            margin-bottom: 0.4rem;
+            color: #f1f5f9;
+        }
+        .lesson-content .theory {
+            color: #cbd5e1;
+            line-height: 1.7;
+            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
+            white-space: pre-wrap;
+        }
+        .lesson-content .theory code {
+            background: #1e293b;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            color: #a78bfa;
+            font-size: 0.85rem;
+        }
+        .lesson-content .example {
+            background: #1e293b;
+            border-left: 4px solid #3b82f6;
+            padding: 0.6rem 1rem;
+            border-radius: 0 8px 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-bottom: 0.8rem;
+            color: #e2e8f0;
+        }
+        .tasks-section {
+            margin-top: 1rem;
+        }
+        .task-item {
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 0.6rem 0.8rem;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid #334155;
+            transition: 0.2s;
+        }
+        .task-item.bonus {
+            border-left-color: #8b5cf6;
+            opacity: 0.85;
+        }
+        .task-item.completed {
+            border-left-color: #22c55e;
+            background: #0f2a1a;
+        }
+        .task-item .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .task-item .task-text {
+            font-size: 0.85rem;
+            color: #e2e8f0;
+            flex: 1;
+        }
+        .task-item .task-text code {
+            background: #0f172a;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            color: #a78bfa;
+            font-size: 0.8rem;
+        }
+        .task-item .task-status {
+            font-size: 0.65rem;
+            padding: 0.1rem 0.5rem;
+            border-radius: 12px;
+            background: #334155;
+            color: #94a3b8;
+            white-space: nowrap;
+        }
+        .task-item .task-status.done {
+            background: #064e3b;
+            color: #86efac;
+        }
+        .task-item .task-status.bonus-label {
+            background: #2e1065;
+            color: #a78bfa;
+        }
+        .task-item .task-actions {
+            display: flex;
+            gap: 0.3rem;
+            margin-top: 0.3rem;
+            flex-wrap: wrap;
+        }
+        .task-item .task-actions .btn-sm {
+            padding: 0.15rem 0.6rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-sm.primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-sm.primary:hover {
+            background: #2563eb;
+        }
+        .btn-sm.success {
+            background: #22c55e;
+            color: white;
+        }
+        .btn-sm.success:hover {
+            background: #16a34a;
+        }
+        .btn-sm.secondary {
+            background: #334155;
+            color: #94a3b8;
+        }
+        .btn-sm.secondary:hover {
+            background: #475569;
+            color: white;
+        }
+        .btn-sm.ai-hint {
+            background: #7c3aed;
+            color: white;
+        }
+        .btn-sm.ai-hint:hover {
+            background: #6d28d9;
+        }
+        .task-item .task-input {
+            width: 100%;
+            min-height: 44px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            padding: 0.4rem;
+            resize: vertical;
+            outline: none;
+            transition: border 0.2s;
+            margin-top: 0.3rem;
+        }
+        .task-item .task-input:focus {
+            border-color: #3b82f6;
+        }
+        .task-item .task-input:disabled {
+            opacity: 0.6;
+        }
+        .task-item .task-result {
+            margin-top: 0.3rem;
+            font-size: 0.75rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            display: none;
+        }
+        .task-item .task-result.show {
+            display: block;
+        }
+        .task-item .task-result.success {
+            background: #064e3b;
+            color: #86efac;
+            border: 1px solid #22c55e;
+        }
+        .task-item .task-result.error {
+            background: #7f1d1d;
+            color: #fca5a5;
+            border: 1px solid #ef4444;
+        }
+        .task-item .task-result.hint {
+            background: #1e1b4b;
+            color: #a78bfa;
+            border: 1px solid #7c3aed;
+        }
+        .actions {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin: 0.8rem 0;
+        }
+        .btn {
+            padding: 0.5rem 1.2rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #16a34a;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: #334155;
+            color: #94a3b8;
+        }
+        .btn-secondary:hover {
+            background: #475569;
+            color: white;
+        }
+        .btn-ai {
+            background: #7c3aed;
+            color: white;
+        }
+        .btn-ai:hover {
+            background: #6d28d9;
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .progress-bar-wrap {
+            background: #334155;
+            border-radius: 20px;
+            height: 5px;
+            overflow: hidden;
+            margin-top: 0.8rem;
+        }
+        .progress-bar-wrap .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #a78bfa);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 20px;
+        }
+        .main-result {
+            padding: 0.5rem 0.8rem;
+            border-radius: 10px;
+            margin: 0.3rem 0 0;
+            font-size: 0.85rem;
+            display: none;
+        }
+        .main-result.success {
+            display: block;
+            background: #064e3b;
+            border: 1px solid #22c55e;
+            color: #86efac;
+        }
+        .main-result.error {
+            display: block;
+            background: #7f1d1d;
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+        }
+        .main-result.show {
+            display: block;
+        }
+        .ai-sidebar {
+            background: #0f172a;
+            border-radius: 16px;
+            padding: 0.8rem;
+            height: fit-content;
+            position: sticky;
+            top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        .ai-sidebar h3 {
+            font-size: 0.9rem;
+            color: #a78bfa;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .ai-sidebar h3 span {
+            font-size: 1.1rem;
+        }
+        .ai-chat {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+        .ai-message {
+            padding: 0.4rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            max-width: 95%;
+            white-space: pre-wrap;
+        }
+        .ai-message.bot {
+            background: #1e293b;
+            color: #e2e8f0;
+            align-self: flex-start;
+            border-bottom-left-radius: 3px;
+        }
+        .ai-message.bot code {
+            background: #0f172a;
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+            color: #a78bfa;
+            font-size: 0.75rem;
+        }
+        .ai-message.user {
+            background: #3b82f6;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 3px;
+        }
+        .ai-input-row {
+            display: flex;
+            gap: 0.4rem;
+            margin-top: 0.2rem;
+        }
+        .ai-input-row input {
+            flex: 1;
+            padding: 0.4rem 0.6rem;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: #e2e8f0;
+            font-size: 0.8rem;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .ai-input-row input:focus {
+            border-color: #7c3aed;
+        }
+        .ai-input-row input::placeholder {
+            color: #64748b;
+        }
+        .ai-input-row button {
+            background: #7c3aed;
+            border: none;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .ai-input-row button:hover {
+            background: #6d28d9;
+        }
+        .ai-quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-top: 0.1rem;
+        }
+        .ai-quick-actions button {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #94a3b8;
+            padding: 0.15rem 0.5rem;
+            border-radius: 30px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .ai-quick-actions button:hover {
+            background: #334155;
+            color: white;
+            border-color: #7c3aed;
+        }
+
+        @media (max-width: 600px) {
+            .app {
+                padding: 0.8rem;
+            }
+            .header-left h1 {
+                font-size: 1.1rem;
+            }
+            .lesson-content {
+                padding: 0.8rem;
+            }
+            .task-item {
+                padding: 0.4rem;
+            }
+            .btn {
+                padding: 0.3rem 0.7rem;
+                font-size: 0.7rem;
+            }
+            .ai-sidebar {
+                position: static;
+            }
+            .main-grid {
+                gap: 0.8rem;
+            }
+            .ai-chat {
+                max-height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app" id="app">
+        <!-- ========================================================
+        ШАПКА — ТУТ ВСЁ ПРОСТО, НО Я ДОЛГО ДУМАЛА НАД ЦВЕТОМ
+        ======================================================== -->
+        <div class="header">
+            <div class="header-left">
+                <h1>🐍 PyLearner AI</h1>
+            </div>
+            <div class="header-right">
+                <div class="lang-switch" id="langSwitch">
+                    <button data-lang="ru" class="active">🇷🇺 RU</button>
+                    <button data-lang="en">🇬🇧 EN</button>
+                </div>
+                <div class="badge">🎯 XP: <span id="xpDisplay">0</span></div>
+                <div class="badge">📚 <span id="currentLessonNum">1</span>/<span id="totalLessons">10</span></div>
+            </div>
+        </div>
+
+        <!-- ========================================================
+        ДОСТИЖЕНИЯ — Я ИХ ПРИДУМАЛА, КОГДА СКУЧАЛА НА УРОКЕ
+        ======================================================== -->
+        <div class="achievements-bar" id="achievementsBar">
+            <span class="label" data-i18n="achievements">🏆 Достижения:</span>
+            <div class="achievement" id="achFirstBlood"><span class="icon">⚡</span> First Blood</div>
+            <div class="achievement" id="achPerfectionist"><span class="icon">💎</span> Perfectionist</div>
+            <div class="achievement" id="achSpeedDemon"><span class="icon">🔥</span> Speed Demon</div>
+            <div class="achievement" id="achScholar"><span class="icon">📖</span> Scholar</div>
+            <div class="achievement" id="achMaster"><span class="icon">👑</span> Master</div>
+        </div>
+
+        <!-- ========================================================
+        ОСНОВНАЯ СЕТКА: УРОКИ + AI-ПОМОЩНИК
+        ======================================================== -->
+        <div class="main-grid">
+            <!-- ЛЕВАЯ КОЛОНКА: УРОКИ -->
+            <div>
+                <div class="lesson-nav" id="lessonNav"></div>
+                <div class="lesson-content" id="lessonContent">
+                    <h2 id="lessonTitle">Variables</h2>
+                    <div class="theory" id="lessonTheory"></div>
+                    <div class="example" id="lessonExample"></div>
+                    <div class="tasks-section" id="tasksContainer"></div>
+                </div>
+                <div class="main-result" id="mainResult"></div>
+                <div class="actions">
+                    <button class="btn btn-secondary" id="resetBtn" data-i18n="reset">↺ Сбросить всё</button>
+                    <button class="btn btn-success" id="nextBtn" disabled data-i18n="next">→ Следующий урок</button>
+                </div>
+                <div class="progress-bar-wrap">
+                    <div class="fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <!-- ПРАВАЯ КОЛОНКА: AI-ПОМОЩНИК -->
+            <div class="ai-sidebar">
+                <h3><span>🤖</span> <span data-i18n="ai_tutor">AI-помощник</span></h3>
+                <div class="ai-chat" id="aiChat">
+                    <div class="ai-message bot" data-i18n="ai_welcome">
+                        👋 Привет! Я твой AI-помощник. Спрашивай подсказки, объяснения, или скажи, что хочешь изучить — я составлю план!
+                    </div>
+                </div>
+                <div class="ai-quick-actions">
+                    <button data-hint="hint" data-i18n="hint">💡 Подсказка</button>
+                    <button data-hint="explain" data-i18n="explain">📖 Объяснить</button>
+                    <button data-hint="plan" data-i18n="plan">📋 План</button>
+                    <button data-hint="fix" data-i18n="fix">🔧 Исправить</button>
+                </div>
+                <div class="ai-input-row">
+                    <input type="text" id="aiInput" data-i18n-placeholder="ask_ai" placeholder="Спроси AI о чём угодно..." />
+                    <button id="aiSendBtn" data-i18n="send">Отправить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        //  ПЕРЕВОДЫ — Я ИХ ДЕЛАЛА С ПОМОЩЬЮ ГУГЛ-ПЕРЕВОДЧИКА, 
+        //  ПОТОМ РУКАМИ ИСПРАВЛЯЛА, ПОЭТОМУ МОГУТ БЫТЬ ОШИБКИ :)
+        // ================================================================
+        const LANG = {
+            ru: {
+                achievements: '🏆 Достижения:',
+                reset: '↺ Сбросить всё',
+                next: '→ Следующий урок',
+                ai_tutor: 'AI-помощник',
+                ai_welcome: '👋 Привет! Я твой AI-помощник. Спрашивай подсказки, объяснения, или скажи, что хочешь изучить — я составлю план!',
+                hint: '💡 Подсказка',
+                explain: '📖 Объяснить',
+                plan: '📋 План',
+                fix: '🔧 Исправить',
+                send: 'Отправить',
+                ask_ai: 'Спроси AI о чём угодно...',
+                required: '⭐ Обязательная',
+                bonus: '🌟 Доп.',
+                done: '✅ Готово',
+                check: '▶ Проверить',
+                reset_task: '↺ Сбросить',
+                ai_hint: '🤖 Подсказка',
+                write_code: 'Напиши код здесь',
+                write_code_optional: 'Напиши код здесь (необязательно)',
+                correct: '🎉 Правильно! Ты молодец! Я горжусь тобой!',
+                wrong: '❌ Не совсем. Проверь синтаксис (кавычки, пробелы, двоеточия).',
+                write_something: '✏️ Эй! Ты забыла написать код! Я не могу проверить пустоту 😅',
+                cant_reset: '⚠️ Обязательную задачу нельзя сбросить (я так придумала, чтобы ты не жульничала)',
+                main_done: '✅ Обязательная задача решена! Можешь переходить к следующему уроку или решать дополнительные (они необязательные, но полезные!).',
+                all_done: '🎉 Все задачи (включая дополнительные) решены! Ты супер! *виртуальные аплодисменты*',
+                congrats: '🏆 ПОЗДРАВЛЯЮ! Ты прошла все 10 уроков! Ты настоящий программист! 👑 (я плачу от счастья)',
+                reset_confirm: 'Сбросить весь прогресс? (все твои достижения исчезнут!)',
+                reset_done: '🔄 Прогресс сброшен. Начинай заново! (я грущу, но это твой выбор)',
+                task_done_ai: '✅ Отлично! Ты решила задачу',
+                keep_going: 'Продолжай в том же духе! 🚀',
+                plan_prompt: 'Помоги мне изучить',
+                i_know: 'я знаю',
+            },
+            en: {
+                achievements: '🏆 Achievements:',
+                reset: '↺ Reset All',
+                next: '→ Next Lesson',
+                ai_tutor: 'AI Tutor',
+                ai_welcome: '👋 Hi! I\'m your AI tutor. Ask me for hints, explain concepts, or tell me what you want to learn and I\'ll build a plan for you!',
+                hint: '💡 Hint',
+                explain: '📖 Explain',
+                plan: '📋 Plan',
+                fix: '🔧 Fix',
+                send: 'Send',
+                ask_ai: 'Ask AI anything...',
+                required: '⭐ Required',
+                bonus: '🌟 Bonus',
+                done: '✅ Done',
+                check: '▶ Check',
+                reset_task: '↺ Reset',
+                ai_hint: '🤖 Hint',
+                write_code: 'Write code here',
+                write_code_optional: 'Write code here (optional)',
+                correct: '🎉 Correct! You\'re awesome! I\'m proud of you!',
+                wrong: '❌ Not quite. Check syntax (quotes, spaces, colons).',
+                write_something: '✏️ Hey! You forgot to write code! I can\'t check emptiness 😅',
+                cant_reset: '⚠️ Required task cannot be reset (I made it this way so you can\'t cheat)',
+                main_done: '✅ Main task done! You can move on or solve bonus tasks (they\'re optional but helpful!).',
+                all_done: '🎉 All tasks (including bonuses) done! You\'re amazing! *virtual applause*',
+                congrats: '🏆 CONGRATULATIONS! You completed all 10 lessons! You\'re a Python Master! 👑 (I\'m crying with joy)',
+                reset_confirm: 'Reset all progress? (all your achievements will disappear!)',
+                reset_done: '🔄 Progress reset. Start fresh! (I\'m sad, but it\'s your choice)',
+                task_done_ai: '✅ Great job! You solved task',
+                keep_going: 'Keep going! 🚀',
+                plan_prompt: 'Help me learn',
+                i_know: 'I know',
+            }
+        };
+
+        let currentLang = 'ru';
+
+        // ================================================================
+        //  УРОКИ — Я ИХ ПРИДУМЫВАЛА ЦЕЛЫЙ ВЕЧЕР, 
+        //  ПОТОМ ПЕРЕДЕЛЫВАЛА, ПОТОМУ ЧТО НЕ ХВАТАЛО ПРИМЕРОВ
+        // ================================================================
+        const LESSONS_DATA = [{
+            id: 0,
+            title: { ru: 'Переменные', en: 'Variables' },
+            theory: {
+                ru: `В Python переменная — это контейнер для данных. Ты можешь сохранить в неё число, текст или что угодно.
+
+        📌 <code>имя_переменной = значение</code>
+
+        Имена переменных могут содержать буквы, цифры и символ подчёркивания, но не могут начинаться с цифры.
+
+        💡 Примеры правильных имён: <code>name</code>, <code>age</code>, <code>is_student</code>, <code>my_var_1</code>
+
+        🔥 Важно: Python чувствителен к регистру! <code>Name</code> и <code>name</code> — это разные переменные.
+
+        🎯 В этом уроке ты научишься создавать переменные с разными типами данных.`,
+                en: `In Python, a variable is a container for data. You can store numbers, text, or anything.
+
+        📌 <code>variable_name = value</code>
+
+        Variable names can contain letters, digits, and underscores, but cannot start with a digit.
+
+        💡 Examples of valid names: <code>name</code>, <code>age</code>, <code>is_student</code>, <code>my_var_1</code>
+
+        🔥 Important: Python is case-sensitive! <code>Name</code> and <code>name</code> are different variables.
+
+        🎯 In this lesson you'll learn to create variables with different data types.`
+            },
+            example: {
+                ru: `# Примеры переменных
+        name = "Анна"      # строка (текст)
+        age = 14            # целое число (int)
+        height = 1.65       # число с точкой (float)
+        is_student = True   # логическое значение (bool)`,
+                en: `# Variable examples
+        name = "Anna"       # string (text)
+        age = 14            # integer
+        height = 1.65       # float
+        is_student = True   # boolean`
+            },
+            tasks: [
+                { text_ru: '⭐ Создай переменную <code>name</code> со значением <code>"Анна"</code>',
+                    text_en: '⭐ Create a variable <code>name</code> with value <code>"Anna"</code>',
+                    solution: 'name = "Anna"',
+                    check: c => c.replace(/\s/g, '').includes('name="Anna"') || c.replace(/\s/g, '').includes(
+                        'name="Анна"') },
+                { text_ru: '🌟 Создай переменную <code>age</code> со значением <code>14</code> (число)',
+                    text_en: '🌟 Create <code>age</code> with value <code>14</code> (number)',
+                    solution: 'age = 14', check: c => c.replace(/\s/g, '').includes('age=14') },
+                { text_ru: '🌟 Создай <code>city</code> со значением <code>"Москва"</code>',
+                    text_en: '🌟 Create <code>city</code> with value <code>"Moscow"</code>',
+                    solution: 'city = "Moscow"', check: c => c.replace(/\s/g, '').includes('city="Moscow"') ||
+                        c.replace(/\s/g, '').includes('city="Москва"') },
+                { text_ru: '🌟 Создай <code>height</code> со значением <code>1.65</code> (число с точкой)',
+                    text_en: '🌟 Create <code>height</code> with value <code>1.65</code> (float)',
+                    solution: 'height = 1.65', check: c => c.replace(/\s/g, '').includes('height=1.65') },
+                { text_ru: '🌟 Создай <code>is_student</code> со значением <code>True</code>',
+                    text_en: '🌟 Create <code>is_student</code> with value <code>True</code>',
+                    solution: 'is_student = True', check: c => c.replace(/\s/g, '').includes('is_student=True') },
+                { text_ru: '🌟 Создай <code>greeting</code> со значением <code>"Привет, мир!"</code>',
+                    text_en: '🌟 Create <code>greeting</code> with value <code>"Hello, world!"</code>',
+                    solution: 'greeting = "Hello, world!"', check: c => c.replace(/\s/g, '').includes(
+                        'greeting="Hello,world!"') ||
+                        c.replace(/\s/g, '').includes('greeting="Привет,мир!"') },
+            ]
+        }, {
+            id: 1,
+            title: { ru: 'Типы данных', en: 'Data Types' },
+            theory: {
+                ru: `В Python есть несколько основных типов данных:
+
+        📌 <code>str</code> — строка (текст в кавычках): <code>"Привет"</code>, <code>'Python'</code>
+        📌 <code>int</code> — целое число: <code>42</code>, <code>-5</code>, <code>0</code>
+        📌 <code>float</code> — число с плавающей точкой: <code>3.14</code>, <code>-0.5</code>, <code>2.0</code>
+        📌 <code>bool</code> — логическое значение: <code>True</code> (истина) или <code>False</code> (ложь)
+
+        💡 Чтобы узнать тип переменной, используй функцию <code>type()</code>:
+        <code>type(age)</code> вернёт <code>&lt;class 'int'&gt;</code>
+
+        🎯 В этом уроке ты научишься создавать переменные разных типов.`,
+                en: `Python has several basic data types:
+
+        📌 <code>str</code> — string (text in quotes): <code>"Hello"</code>, <code>'Python'</code>
+        📌 <code>int</code> — integer: <code>42</code>, <code>-5</code>, <code>0</code>
+        📌 <code>float</code> — floating-point number: <code>3.14</code>, <code>-0.5</code>, <code>2.0</code>
+        📌 <code>bool</code> — boolean: <code>True</code> or <code>False</code>
+
+        💡 Use <code>type()</code> to check a variable's type:
+        <code>type(age)</code> returns <code>&lt;class 'int'&gt;</code>
+
+        🎯 In this lesson you'll create variables of different types.`
+            },
+            example: {
+                ru: `# Примеры разных типов
+        name = "Анна"        # str
+        age = 14             # int
+        height = 1.65        # float
+        is_student = True    # bool`,
+                en: `# Examples of different types
+        name = "Anna"        # str
+        age = 14             # int
+        height = 1.65        # float
+        is_student = True    # bool`
+            },
+            tasks: [
+                { text_ru: '⭐ Создай переменную <code>age</code> со значением <code>14</code> (int)',
+                    text_en: '⭐ Create <code>age</code> with value <code>14</code> (int)',
+                    solution: 'age = 14', check: c => c.replace(/\s/g, '').includes('age=14') },
+                { text_ru: '🌟 Создай <code>pi</code> со значением <code>3.14</code> (float)',
+                    text_en: '🌟 Create <code>pi</code> with value <code>3.14</code> (float)',
+                    solution: 'pi = 3.14', check: c => c.replace(/\s/g, '').includes('pi=3.14') },
+                { text_ru: '🌟 Создай <code>name</code> со значением <code>"Python"</code> (str)',
+                    text_en: '🌟 Create <code>name</code> with value <code>"Python"</code> (str)',
+                    solution: 'name = "Python"', check: c => c.replace(/\s/g, '').includes('name="Python"') },
+                { text_ru: '🌟 Создай <code>is_fun</code> со значением <code>True</code> (bool)',
+                    text_en: '🌟 Create <code>is_fun</code> with value <code>True</code> (bool)',
+                    solution: 'is_fun = True', check: c => c.replace(/\s/g, '').includes('is_fun=True') },
+                { text_ru: '🌟 Создай <code>temperature</code> со значением <code>-5</code> (int)',
+                    text_en: '🌟 Create <code>temperature</code> with <code>-5</code> (int)',
+                    solution: 'temperature = -5', check: c => c.replace(/\s/g, '').includes('temperature=-5') },
+                { text_ru: '🌟 Создай <code>price</code> со значением <code>99.99</code> (float)',
+                    text_en: '🌟 Create <code>price</code> with <code>99.99</code> (float)',
+                    solution: 'price = 99.99', check: c => c.replace(/\s/g, '').includes('price=99.99') },
+            ]
+        }, {
+            id: 2,
+            title: { ru: 'Условия (if)', en: 'Conditions (if)' },
+            theory: {
+                ru: `Условия позволяют программе принимать решения.
+
+        📌 <code>if условие:</code>
+            <code>действие</code>
+
+        🔥 Важно: после <code>if</code> нужно ставить двоеточие <code>:</code>, а код внутри условия — с отступом (4 пробела).
+
+        📌 Операторы сравнения:
+        • <code>==</code> — равно
+        • <code>!=</code> — не равно
+        • <code>&gt;</code> — больше
+        • <code>&lt;</code> — меньше
+        • <code>&gt;=</code> — больше или равно
+        • <code>&lt;=</code> — меньше или равно
+
+        🎯 В этом уроке ты научишься использовать условия <code>if</code>.`,
+                en: `Conditions let your program make decisions.
+
+        📌 <code>if condition:</code>
+            <code>action</code>
+
+        🔥 Important: use colon <code>:</code> after <code>if</code>, and indent the code inside (4 spaces).
+
+        📌 Comparison operators:
+        • <code>==</code> — equal
+        • <code>!=</code> — not equal
+        • <code>&gt;</code> — greater
+        • <code>&lt;</code> — less
+        • <code>&gt;=</code> — greater or equal
+        • <code>&lt;=</code> — less or equal
+
+        🎯 In this lesson you'll learn to use <code>if</code> conditions.`
+            },
+            example: {
+                ru: `# Пример условия
+        x = 10
+        if x > 5:
+            print("x больше пяти")`,
+                en: `# Example of a condition
+        x = 10
+        if x > 5:
+            print("x is greater than five")`
+            },
+            tasks: [
+                { text_ru: '⭐ Напиши: <code>if x > 5: print("Больше пяти")</code>',
+                    text_en: '⭐ Write: <code>if x > 5: print("Greater than five")</code>',
+                    solution: 'if x > 5:\n    print("Greater than five")',
+                    check: c => c.replace(/\s/g, '').includes('ifx>5:') && (c.replace(/\s/g, '').includes(
+                        'print("Greaterthanfive")') || c.replace(/\s/g, '').includes('print("Большепяти")')) },
+                { text_ru: '🌟 Напиши: <code>if y < 10: print("Меньше десяти")</code>',
+                    text_en: '🌟 Write: <code>if y < 10: print("Less than ten")</code>',
+                    solution: 'if y < 10:\n    print("Less than ten")',
+                    check: c => c.replace(/\s/g, '').includes('ify<10:') && (c.replace(/\s/g, '').includes(
+                        'print("Lessthanten")') || c.replace(/\s/g, '').includes('print("Меньшедесяти")')) },
+                { text_ru: '🌟 Напиши: <code>if z == 0: print("Ноль")</code>',
+                    text_en: '🌟 Write: <code>if z == 0: print("Zero")</code>',
+                    solution: 'if z == 0:\n    print("Zero")',
+                    check: c => c.replace(/\s/g, '').includes('ifz==0:') && (c.replace(/\s/g, '').includes(
+                        'print("Zero")') || c.replace(/\s/g, '').includes('print("Ноль")')) },
+                { text_ru: '🌟 Напиши: <code>if age >= 18: print("Взрослый")</code>',
+                    text_en: '🌟 Write: <code>if age >= 18: print("Adult")</code>',
+                    solution: 'if age >= 18:\n    print("Adult")',
+                    check: c => c.replace(/\s/g, '').includes('ifage>=18:') && (c.replace(/\s/g, '').includes(
+                        'print("Adult")') || c.replace(/\s/g, '').includes('print("Взрослый")')) },
+                { text_ru: '🌟 Напиши: <code>if temp < 0: print("Мороз")</code>',
+                    text_en: '🌟 Write: <code>if temp < 0: print("Freezing")</code>',
+                    solution: 'if temp < 0:\n    print("Freezing")',
+                    check: c => c.replace(/\s/g, '').includes('iftemp<0:') && (c.replace(/\s/g, '').includes(
+                        'print("Freezing")') || c.replace(/\s/g, '').includes('print("Мороз")')) },
+                { text_ru: '🌟 Напиши: <code>if score > 80: print("Отлично")</code>',
+                    text_en: '🌟 Write: <code>if score > 80: print("Excellent")</code>',
+                    solution: 'if score > 80:\n    print("Excellent")',
+                    check: c => c.replace(/\s/g, '').includes('ifscore>80:') && (c.replace(/\s/g, '').includes(
+                        'print("Excellent")') || c.replace(/\s/g, '').includes('print("Отлично")')) },
+            ]
+        }, {
+            id: 3,
+            title: { ru: 'Циклы (for)', en: 'Loops (for)' },
+            theory: {
+                ru: `Циклы повторяют код несколько раз.
+
+        📌 <code>for переменная in range(количество):</code>
+            <code>действие</code>
+
+        📌 Функция <code>range(n)</code> создаёт последовательность от 0 до n-1:
+        • <code>range(3)</code> → 0, 1, 2
+        • <code>range(1, 5)</code> → 1, 2, 3, 4
+        • <code>range(2, 10, 2)</code> → 2, 4, 6, 8 (шаг 2)
+
+        🔥 Циклы очень полезны для повторяющихся задач!
+
+        🎯 В этом уроке ты научишься использовать циклы <code>for</code>.`,
+                en: `Loops repeat code multiple times.
+
+        📌 <code>for variable in range(count):</code>
+            <code>action</code>
+
+        📌 <code>range(n)</code> creates a sequence from 0 to n-1:
+        • <code>range(3)</code> → 0, 1, 2
+        • <code>range(1, 5)</code> → 1, 2, 3, 4
+        • <code>range(2, 10, 2)</code> → 2, 4, 6, 8 (step 2)
+
+        🔥 Loops are very useful for repetitive tasks!
+
+        🎯 In this lesson you'll learn to use <code>for</code> loops.`
+            },
+            example: {
+                ru: `# Пример цикла
+        for i in range(3):
+            print(i)  # напечатает 0, 1, 2`,
+                en: `# Loop example
+        for i in range(3):
+            print(i)  # prints 0, 1, 2`
+            },
+            tasks: [
+                { text_ru: '⭐ Напиши: <code>for i in range(3): print(i)</code>',
+                    text_en: '⭐ Write: <code>for i in range(3): print(i)</code>',
+                    solution: 'for i in range(3):\n    print(i)',
+                    check: c => c.replace(/\s/g, '').includes('foriinrange(3):') && c.replace(/\s/g, '').includes(
+                        'print(i)') },
+                { text_ru: '🌟 Напиши: <code>for i in range(5): print(i)</code> (0-4)',
+                    text_en: '🌟 Write: <code>for i in range(5): print(i)</code> (0-4)',
+                    solution: 'for i in range(5):\n    print(i)',
+                    check: c => c.replace(/\s/g, '').includes('foriinrange(5):') && c.replace(/\s/g, '').includes(
+                        'print(i)') },
+                { text_ru: '🌟 Напиши: <code>for x in range(1, 6): print(x)</code> (1-5)',
+                    text_en: '🌟 Write: <code>for x in range(1, 6): print(x)</code> (1-5)',
+                    solution: 'for x in range(1, 6):\n    print(x)',
+                    check: c => c.replace(/\s/g, '').includes('forxinrange(1,6):') && c.replace(/\s/g, '').includes(
+                        'print(x)') },
+                { text_ru: '🌟 Напиши: <code>for i in range(2, 10, 2): print(i)</code> (чётные 2-8)',
+                    text_en: '🌟 Write: <code>for i in range(2, 10, 2): print(i)</code> (even 2-8)',
+                    solution: 'for i in range(2, 10, 2):\n    print(i)',
+                    check: c => c.replace(/\s/g, '').includes('foriinrange(2,10,2):') && c.replace(/\s/g, '').includes(
+                        'print(i)') },
+                { text_ru: '🌟 Напиши: <code>for n in range(5, 0, -1): print(n)</code> (от 5 до 1)',
+                    text_en: '🌟 Write: <code>for n in range(5, 0, -1): print(n)</code> (5 to 1)',
+                    solution: 'for n in range(5, 0, -1):\n    print(n)',
+                    check: c => c.replace(/\s/g, '').includes('forninrange(5,0,-1):') && c.replace(/\s/g, '').includes(
+                        'print(n)') },
+                { text_ru: '🌟 Напиши: <code>for fruit in ["apple","banana"]: print(fruit)</code>',
+                    text_en: '🌟 Write: <code>for fruit in ["apple","banana"]: print(fruit)</code>',
+                    solution: 'for fruit in ["apple", "banana"]:\n    print(fruit)',
+                    check: c => c.replace(/\s/g, '').includes('forfruitin["apple","banana"]:') && c.replace(/\s/g, '')
+                        .includes('print(fruit)') },
+            ]
+        }, {
+            id: 4,
+            title: { ru: 'Функции (def)', en: 'Functions (def)' },
+            theory: {
+                ru: `Функции — это переиспользуемые блоки кода.
+
+        📌 <code>def имя_функции(параметры):</code>
+            <code>действие</code>
+            <code>return результат</code>
+
+        💡 Функции помогают организовать код и не повторять одно и то же.
+
+        🔥 <code>return</code> возвращает значение. Без <code>return</code> функция возвращает <code>None</code>.
+
+        🎯 В этом уроке ты научишься создавать свои функции.`,
+                en: `Functions are reusable code blocks.
+
+        📌 <code>def function_name(parameters):</code>
+            <code>action</code>
+            <code>return result</code>
+
+        💡 Functions help organize code and avoid repetition.
+
+        🔥 <code>return</code> sends back a value. Without <code>return</code>, a function returns <code>None</code>.
+
+        🎯 In this lesson you'll learn to create your own functions.`
+            },
+            example: {
+                ru: `# Пример функции
+        def hello():
+            print("Привет!")`,
+                en: `# Function example
+        def hello():
+            print("Hello!")`
+            },
+            tasks: [
+                { text_ru: '⭐ Создай функцию <code>def hello(): print("Привет!")</code>',
+                    text_en: '⭐ Create <code>def hello(): print("Hello!")</code>',
+                    solution: 'def hello():\n    print("Hello!")',
+                    check: c => c.replace(/\s/g, '').includes('defhello():') && (c.replace(/\s/g, '').includes(
+                        'print("Hello!")') || c.replace(/\s/g, '').includes('print("Привет!")')) },
+                { text_ru: '🌟 Создай <code>def greet(name): print("Привет, " + name)</code>',
+                    text_en: '🌟 Create <code>def greet(name): print("Hello, " + name)</code>',
+                    solution: 'def greet(name):\n    print("Hello, " + name)',
+                    check: c => c.replace(/\s/g, '').includes('defgreet(name):') && (c.replace(/\s/g, '').includes(
+                        'print("Hello,"+name)') || c.replace(/\s/g, '').includes('print("Привет,"+name)')) },
+                { text_ru: '🌟 Создай <code>def add(a, b): return a + b</code>',
+                    text_en: '🌟 Create <code>def add(a, b): return a + b</code>',
+                    solution: 'def add(a, b):\n    return a + b',
+                    check: c => c.replace(/\s/g, '').includes('defadd(a,b):') && c.replace(/\s/g, '').includes(
+                        'returna+b') },
+                { text_ru: '🌟 Создай <code>def square(x): return x * x</code>',
+                    text_en: '🌟 Create <code>def square(x): return x * x</code>',
+                    solution: 'def square(x):\n    return x * x',
+                    check: c => c.replace(/\s/g, '').includes('defsquare(x):') && c.replace(/\s/g, '').includes(
+                        'returnx*x') },
+                { text_ru: '🌟 Создай <code>def is_even(n): return n % 2 == 0</code>',
+                    text_en: '🌟 Create <code>def is_even(n): return n % 2 == 0</code>',
+                    solution: 'def is_even(n):\n    return n % 2 == 0',
+                    check: c => c.replace(/\s/g, '').includes('defis_even(n):') && c.replace(/\s/g, '').includes(
+                        'returnn%2==0') },
+                { text_ru: '🌟 Создай <code>def multiply(a, b): return a * b</code>',
+                    text_en: '🌟 Create <code>def multiply(a, b): return a * b</code>',
+                    solution: 'def multiply(a, b):\n    return a * b',
+                    check: c => c.replace(/\s/g, '').includes('defmultiply(a,b):') && c.replace(/\s/g, '').includes(
+                        'returna*b') },
+            ]
+        }, {
+            id: 5,
+            title: { ru: 'Списки (list)', en: 'Lists' },
+            theory: {
+                ru: `Списки — это коллекции элементов. Они хранят несколько значений в одной переменной.
+
+        📌 <code>список = [элемент1, элемент2, элемент3]</code>
+
+        💡 Элементы списка могут быть разных типов.
+        📌 Доступ к элементу по индексу: <code>список[0]</code> — первый элемент, <code>список[-1]</code> — последний.
+
+        🔥 Индексы начинаются с 0! <code>len(список)</code> — длина списка.
+
+        🎯 В этом уроке ты научишься работать со списками.`,
+                en: `Lists are collections of elements. They store multiple values in one variable.
+
+        📌 <code>list = [element1, element2, element3]</code>
+
+        💡 List elements can be of different types.
+        📌 Access by index: <code>list[0]</code> — first element, <code>list[-1]</code> — last.
+
+        🔥 Indexes start from 0! <code>len(list)</code> — list length.
+
+        🎯 In this lesson you'll learn to work with lists.`
+            },
+            example: {
+                ru: `# Пример списка
+        fruits = ["яблоко", "банан", "апельсин"]
+        print(fruits[0])  # яблоко
+        print(len(fruits))  # 3`,
+                en: `# List example
+        fruits = ["apple", "banana", "orange"]
+        print(fruits[0])  # apple
+        print(len(fruits))  # 3`
+            },
+            tasks: [
+                { text_ru: '⭐ Создай список <code>fruits</code> с элементами <code>"яблоко", "банан"</code>',
+                    text_en: '⭐ Create list <code>fruits</code> with items <code>"apple", "banana"</code>',
+                    solution: 'fruits = ["apple", "banana"]',
+                    check: c => c.replace(/\s/g, '').includes('fruits=["apple","banana"]') || c.replace(/\s/g, '')
+                        .includes('fruits=["яблоко","банан"]') },
+                { text_ru: '🌟 Создай список <code>numbers</code> с числами <code>1, 2, 3</code>',
+                    text_en: '🌟 Create list <code>numbers</code> with <code>1, 2, 3</code>',
+                    solution: 'numbers = [1, 2, 3]',
+                    check: c => c.replace(/\s/g, '').includes('numbers=[1,2,3]') },
+                { text_ru: '🌟 Создай список <code>mixed</code> с разными типами: <code>1, "text", True</code>',
+                    text_en: '🌟 Create list <code>mixed</code> with different types: <code>1, "text", True</code>',
+                    solution: 'mixed = [1, "text", True]',
+                    check: c => c.replace(/\s/g, '').includes('mixed=[1,"text",True]') },
+                { text_ru: '🌟 Создай переменную <code>first</code> равную первому элементу списка <code>fruits</code>',
+                    text_en: '🌟 Create <code>first</code> equal to first element of <code>fruits</code>',
+                    solution: 'first = fruits[0]',
+                    check: c => c.replace(/\s/g, '').includes('first=fruits[0]') },
+                { text_ru: '🌟 Создай переменную <code>last</code> равную последнему элементу списка <code>fruits</code>',
+                    text_en: '🌟 Create <code>last</code> equal to last element of <code>fruits</code>',
+                    solution: 'last = fruits[-1]',
+                    check: c => c.replace(/\s/g, '').includes('last=fruits[-1]') },
+                { text_ru: '🌟 Создай список <code>colors</code> с тремя любыми цветами',
+                    text_en: '🌟 Create list <code>colors</code> with any three colors',
+                    solution: 'colors = ["red", "blue", "green"]',
+                    check: c => c.replace(/\s/g, '').includes('colors=[') && c.replace(/\s/g, '').includes(']') },
+            ]
+        }, {
+            id: 6,
+            title: { ru: 'Словари (dict)', en: 'Dictionaries' },
+            theory: {
+                ru: `Словари хранят пары "ключ → значение".
+
+        📌 <code>словарь = {"ключ1": значение1, "ключ2": значение2}</code>
+
+        💡 Ключи обычно строки, значения могут быть любыми.
+        📌 Доступ по ключу: <code>словарь["ключ"]</code>
+
+        🔥 Словари очень полезны для структурированных данных (например, информация о человеке).
+
+        🎯 В этом уроке ты научишься создавать словари.`,
+                en: `Dictionaries store key → value pairs.
+
+        📌 <code>dict = {"key1": value1, "key2": value2}</code>
+
+        💡 Keys are usually strings, values can be anything.
+        📌 Access by key: <code>dict["key"]</code>
+
+        🔥 Dictionaries are great for structured data (e.g., person info).
+
+        🎯 In this lesson you'll learn to create dictionaries.`
+            },
+            example: {
+                ru: `# Пример словаря
+        person = {"name": "Анна", "age": 14, "city": "Москва"}
+        print(person["name"])  # Анна`,
+                en: `# Dictionary example
+        person = {"name": "Anna", "age": 14, "city": "Moscow"}
+        print(person["name"])  # Anna`
+            },
+            tasks: [
+                { text_ru: '⭐ Создай словарь <code>person</code> с ключами <code>"name", "age"</code> и любыми значениями',
+                    text_en: '⭐ Create dict <code>person</code> with keys <code>"name", "age"</code> and any values',
+                    solution: 'person = {"name": "Anna", "age": 14}',
+                    check: c => c.replace(/\s/g, '').includes('person={"name":') && c.replace(/\s/g, '').includes(
+                        '"age":') },
+                { text_ru: '🌟 Создай словарь <code>book</code> с ключами <code>"title", "author"</code>',
+                    text_en: '🌟 Create dict <code>book</code> with keys <code>"title", "author"</code>',
+                    solution: 'book = {"title": "Python", "author": "Guido"}',
+                    check: c => c.replace(/\s/g, '').includes('book={"title":') && c.replace(/\s/g, '').includes(
+                        '"author":') },
+                { text_ru: '🌟 Создай переменную <code>name</code> равную значению по ключу <code>"name"</code> из словаря <code>person</code>',
+                    text_en: '🌟 Create <code>name</code> equal to value by key <code>"name"</code> from <code>person</code>',
+                    solution: 'name = person["name"]',
+                    check: c => c.replace(/\s/g, '').includes('name=person["name"]') },
+                { text_ru: '🌟 Создай словарь <code>car</code> с ключами <code>"brand", "year"</code>',
+                    text_en: '🌟 Create dict <code>car</code> with keys <code>"brand", "year"</code>',
+                    solution: 'car = {"brand": "Tesla", "year": 2023}',
+                    check: c => c.replace(/\s/g, '').includes('car={"brand":') && c.replace(/\s/g, '').includes(
+                        '"year":') },
+                { text_ru: '🌟 Создай словарь <code>student</code> с ключами <code>"name", "grade"</code>',
+                    text_en: '🌟 Create dict <code>student</code> with keys <code>"name", "grade"</code>',
+                    solution: 'student = {"name": "Alice", "grade": 5}',
+                    check: c => c.replace(/\s/g, '').includes('student={"name":') && c.replace(/\s/g, '').includes(
+                        '"grade":') },
+                { text_ru: '🌟 Создай переменную <code>age</code> из словаря <code>person</code> по ключу <code>"age"</code>',
+                    text_en: '🌟 Create <code>age</code> from <code>person</code> by key <code>"age"</code>',
+                    solution: 'age = person["age"]',
+                    check: c => c.replace(/\s/g, '').includes('age=person["age"]') },
+            ]
+        }, {
+            id: 7,
+            title: { ru: 'Циклы while', en: 'While Loops' },
+            theory: {
+                ru: `Цикл <code>while</code> повторяется, пока условие истинно.
+
+        📌 <code>while условие:</code>
+            <code>действие</code>
+
+        🔥 Важно: убедись, что условие когда-нибудь станет ложным, иначе цикл будет бесконечным!
+
+        💡 <code>while</code> полезен, когда количество повторений неизвестно заранее.
+
+        🎯 В этом уроке ты научишься использовать циклы <code>while</code>.`,
+                en: `The <code>while</code> loop repeats while the condition is true.
+
+        📌 <code>while condition:</code>
+            <code>action</code>
+
+        🔥 Important: make sure the condition becomes false eventually, otherwise it's an infinite loop!
+
+        💡 <code>while</code> is useful when the number of repetitions isn't known in advance.
+
+        🎯 In this lesson you'll learn to use <code>while</code> loops.`
+            },
+            example: {
+                ru: `# Пример while
+        i = 0
+        while i < 3:
+            print(i)
+            i = i + 1  # увеличиваем i`,
+                en: `# While example
+        i = 0
+        while i < 3:
+            print(i)
+            i = i + 1  # increment i`
+            },
+            tasks: [
+                { text_ru: '⭐ Напиши: <code>i = 0; while i < 3: print(i); i = i + 1</code>',
+                    text_en: '⭐ Write: <code>i = 0; while i < 3: print(i); i = i + 1</code>',
+                    solution: 'i = 0\nwhile i < 3:\n    print(i)\n    i = i + 1',
+                    check: c => c.replace(/\s/g, '').includes('whilei<3:') && c.replace(/\s/g, '').includes(
+                        'print(i)') && c.replace(/\s/g, '').includes('i=i+1') },
+                { text_ru: '🌟 Напиши: <code>i = 5; while i > 0: print(i); i = i - 1</code> (от 5 до 1)',
+                    text_en: '🌟 Write: <code>i = 5; while i > 0: print(i); i = i - 1</code> (5 to 1)',
+                    solution: 'i = 5\nwhile i > 0:\n    print(i)\n    i = i - 1',
+                    check: c => c.replace(/\s/g, '').includes('whilei>0:') && c.replace(/\s/g, '').includes(
+                        'print(i)') && c.replace(/\s/g, '').includes('i=i-1') },
+                { text_ru: '🌟 Напиши: <code>i = 0; while i < 5: i = i + 1</code>',
+                    text_en: '🌟 Write: <code>i = 0; while i < 5: i = i + 1</code>',
+                    solution: 'i = 0\nwhile i < 5:\n    i = i + 1',
+                    check: c => c.replace(/\s/g, '').includes('whilei<5:') && c.replace(/\s/g, '').includes(
+                        'i=i+1') },
+                { text_ru: '🌟 Напиши: <code>i = 10; while i > 0: i = i - 2</code> (от 10 до 0 с шагом 2)',
+                    text_en: '🌟 Write: <code>i = 10; while i > 0: i = i - 2</code> (10 to 0 step 2)',
+                    solution: 'i = 10\nwhile i > 0:\n    i = i - 2',
+                    check: c => c.replace(/\s/g, '').includes('whilei>0:') && c.replace(/\s/g, '').includes(
+                        'i=i-2') },
+                { text_ru: '🌟 Напиши: <code>i = 1; while i <= 3: print(i); i = i + 1</code>',
+                    text_en: '🌟 Write: <code>i = 1; while i <= 3: print(i); i = i + 1</code>',
+                    solution: 'i = 1\nwhile i <= 3:\n    print(i)\n    i = i + 1',
+                    check: c => c.replace(/\s/g, '').includes('whilei<=3:') && c.replace(/\s/g, '').includes(
+                        'print(i)') && c.replace(/\s/g, '').includes('i=i+1') },
+                { text_ru: '🌟 Напиши: <code>i = 0; while i < 4: i = i + 1; print(i)</code> (напечатает 1-4)',
+                    text_en: '🌟 Write: <code>i = 0; while i < 4: i = i + 1; print(i)</code> (prints 1-4)',
+                    solution: 'i = 0\nwhile i < 4:\n    i = i + 1\n    print(i)',
+                    check: c => c.replace(/\s/g, '').includes('whilei<4:') && c.replace(/\s/g, '').includes(
+                        'i=i+1') && c.replace(/\s/g, '').includes('print(i)') },
+            ]
+        }, {
+            id: 8,
+            title: { ru: 'Строки (str)', en: 'Strings' },
+            theory: {
+                ru: `Строки — это текст в кавычках.
+
+        📌 <code>"текст"</code> или <code>'текст'</code>
+
+        💡 Строки можно складывать: <code>"Привет, " + "мир!"</code> → <code>"Привет, мир!"</code>
+
+        📌 Полезные методы:
+        • <code>len("текст")</code> — длина строки
+        • <code>"текст".upper()</code> — в верхний регистр
+        • <code>"ТЕКСТ".lower()</code> — в нижний регистр
+        • <code>"текст".replace("е", "а")</code> — замена
+
+        🎯 В этом уроке ты научишься работать со строками.`,
+                en: `Strings are text in quotes.
+
+        📌 <code>"text"</code> or <code>'text'</code>
+
+        💡 Strings can be concatenated: <code>"Hello, " + "world!"</code> → <code>"Hello, world!"</code>
+
+        📌 Useful methods:
+        • <code>len("text")</code> — string length
+        • <code>"text".upper()</code> — uppercase
+        • <code>"TEXT".lower()</code> — lowercase
+        • <code>"text".replace("e", "a")</code> — replace
+
+        🎯 In this lesson you'll learn to work with strings.`
+            },
+            example: {
+                ru: `# Примеры строк
+        name = "Анна"
+        greeting = "Привет, " + name
+        print(greeting)  # Привет, Анна
+        print(len(name))  # 4`,
+                en: `# String examples
+        name = "Anna"
+        greeting = "Hello, " + name
+        print(greeting)  # Hello, Anna
+        print(len(name))  # 4`
+            },
+            tasks: [
+                { text_ru: '⭐ Создай переменную <code>text</code> со значением <code>"Python"</code>',
+                    text_en: '⭐ Create variable <code>text</code> with value <code>"Python"</code>',
+                    solution: 'text = "Python"',
+                    check: c => c.replace(/\s/g, '').includes('text="Python"') },
+                { text_ru: '🌟 Создай переменную <code>greeting</code> как <code>"Hello, " + "world"</code>',
+                    text_en: '🌟 Create <code>greeting</code> as <code>"Hello, " + "world"</code>',
+                    solution: 'greeting = "Hello, " + "world"',
+                    check: c => c.replace(/\s/g, '').includes('greeting="Hello,"+"world"') },
+                { text_ru: '🌟 Создай переменную <code>length</code> равную длине строки <code>"Python"</code>',
+                    text_en: '🌟 Create <code>length</code> equal to length of <code>"Python"</code>',
+                    solution: 'length = len("Python")',
+                    check: c => c.replace(/\s/g, '').includes('length=len("Python")') },
+                { text_ru: '🌟 Создай переменную <code>upper_text</code> из <code>"hello"</code> в верхнем регистре',
+                    text_en: '🌟 Create <code>upper_text</code> from <code>"hello"</code> in uppercase',
+                    solution: 'upper_text = "hello".upper()',
+                    check: c => c.replace(/\s/g, '').includes('upper_text="hello".upper()') },
+                { text_ru: '🌟 Создай переменную <code>lower_text</code> из <code>"PYTHON"</code> в нижнем регистре',
+                    text_en: '🌟 Create <code>lower_text</code> from <code>"PYTHON"</code> in lowercase',
+                    solution: 'lower_text = "PYTHON".lower()',
+                    check: c => c.replace(/\s/g, '').includes('lower_text="PYTHON".lower()') },
+                { text_ru: '🌟 Создай переменную <code>replaced</code> заменив в <code>"Hello"</code> <code>"e"</code> на <code>"a"</code>',
+                    text_en: '🌟 Create <code>replaced</code> replacing <code>"e"</code> with <code>"a"</code> in <code>"Hello"</code>',
+                    solution: 'replaced = "Hello".replace("e", "a")',
+                    check: c => c.replace(/\s/g, '').includes('replaced="Hello".replace("e","a")') },
+            ]
+        }, {
+            id: 9,
+            title: { ru: 'Алгоритмы и практика', en: 'Algorithms & Practice' },
+            theory: {
+                ru: `Поздравляю! Ты прошла все основы Python. Теперь время для практики!
+
+        🎯 В этом уроке ты применишь все знания на практике.
+
+        📌 Вспомним:
+        • переменные и типы данных
+        • условия <code>if/else</code>
+        • циклы <code>for</code> и <code>while</code>
+        • функции <code>def</code>
+        • списки и словари
+
+        🔥 Решай задачи и покажи, чему ты научилась!`,
+                en: `Congratulations! You've covered all Python basics. Now it's time for practice!
+
+        🎯 In this lesson you'll apply all your knowledge.
+
+        📌 Let's review:
+        • variables and data types
+        • <code>if/else</code> conditions
+        • <code>for</code> and <code>while</code> loops
+        • <code>def</code> functions
+        • lists and dictionaries
+
+        🔥 Solve the tasks and show what you've learned!`
+            },
+            example: {
+                ru: `# Пример решения
+        def sum_numbers(a, b):
+            return a + b
+
+        result = sum_numbers(3, 5)
+        print(result)  # 8`,
+                en: `# Example solution
+        def sum_numbers(a, b):
+            return a + b
+
+        result = sum_numbers(3, 5)
+        print(result)  # 8`
+            },
+            tasks: [
+                { text_ru: '⭐ Напиши функцию <code>sum_numbers(a, b)</code>, которая возвращает <code>a + b</code>',
+                    text_en: '⭐ Write function <code>sum_numbers(a, b)</code> returning <code>a + b</code>',
+                    solution: 'def sum_numbers(a, b):\n    return a + b',
+                    check: c => c.replace(/\s/g, '').includes('defsum_numbers(a,b):') && c.replace(/\s/g, '').includes(
+                        'returna+b') },
+                { text_ru: '🌟 Создай список <code>numbers</code> от 1 до 5 и переменную <code>total</code> равную сумме всех элементов',
+                    text_en: '🌟 Create list <code>numbers</code> 1-5 and <code>total</code> as sum of all elements',
+                    solution: 'numbers = [1, 2, 3, 4, 5]\ntotal = sum(numbers)',
+                    check: c => c.replace(/\s/g, '').includes('numbers=[1,2,3,4,5]') && c.replace(/\s/g, '').includes(
+                        'total=sum(numbers)') },
+                { text_ru: '🌟 Создай цикл, который печатает все чётные числа от 2 до 10',
+                    text_en: '🌟 Create a loop that prints all even numbers from 2 to 10',
+                    solution: 'for i in range(2, 11, 2):\n    print(i)',
+                    check: c => c.replace(/\s/g, '').includes('foriinrange(2,11,2):') && c.replace(/\s/g, '').includes(
+                        'print(i)') },
+                { text_ru: '🌟 Создай функцию <code>is_positive(n)</code>, возвращающую <code>True</code> если <code>n > 0</code>',
+                    text_en: '🌟 Create function <code>is_positive(n)</code> returning <code>True</code> if <code>n > 0</code>',
+                    solution: 'def is_positive(n):\n    return n > 0',
+                    check: c => c.replace(/\s/g, '').includes('defis_positive(n):') && c.replace(/\s/g, '').includes(
+                        'returnn>0') },
+                { text_ru: '🌟 Создай словарь <code>student</code> с ключами <code>"name"</code>, <code>"age"</code>, <code>"grade"</code>',
+                    text_en: '🌟 Create dict <code>student</code> with keys <code>"name"</code>, <code>"age"</code>, <code>"grade"</code>',
+                    solution: 'student = {"name": "Anna", "age": 14, "grade": 5}',
+                    check: c => c.replace(/\s/g, '').includes('student={"name":') && c.replace(/\s/g, '').includes(
+                        '"age":') && c.replace(/\s/g, '').includes('"grade":') },
+                { text_ru: '🌟 Напиши цикл <code>while</code>, который печатает числа от 5 до 1 (обратный отсчёт)',
+                    text_en: '🌟 Write a <code>while</code> loop that prints numbers 5 to 1 (countdown)',
+                    solution: 'i = 5\nwhile i > 0:\n    print(i)\n    i = i - 1',
+                    check: c => c.replace(/\s/g, '').includes('whilei>0:') && c.replace(/\s/g, '').includes(
+                        'print(i)') && c.replace(/\s/g, '').includes('i=i-1') },
+            ]
+        }];
+
+        // ================================================================
+        //  КАРТЫ ДЛЯ AI — Я ИХ ПРИДУМЫВАЛА, КОГДА ГОТОВИЛАСЬ К ЭКЗАМЕНУ
+        // ================================================================
+        const TOPIC_PREREQUISITES = {
+            'переменные': [],
+            'типы данных': ['переменные'],
+            'условия': ['переменные', 'типы данных'],
+            'циклы for': ['переменные', 'типы данных', 'условия'],
+            'циклы while': ['переменные', 'типы данных', 'условия'],
+            'функции': ['переменные', 'типы данных', 'условия', 'циклы for'],
+            'списки': ['переменные', 'типы данных', 'циклы for'],
+            'словари': ['переменные', 'типы данных', 'списки'],
+            'строки': ['переменные', 'типы данных'],
+            'рекурсия': ['функции', 'условия'],
+            'алгоритмы': ['переменные', 'типы данных', 'условия', 'циклы for', 'циклы while', 'функции', 'списки'],
+            'сортировка': ['алгоритмы', 'списки', 'циклы for'],
+            'поиск': ['алгоритмы', 'списки', 'условия'],
+            'dfs': ['алгоритмы', 'рекурсия', 'графы'],
+            'графы': ['списки', 'словари', 'алгоритмы'],
+            'ооп': ['функции', 'классы'],
+            'классы': ['функции', 'типы данных'],
+            'исключения': ['условия', 'функции'],
+            'работа с файлами': ['функции', 'строки'],
+            'библиотеки': ['функции', 'исключения'],
+        };
+
+        const TOPIC_LESSON_MAP = {
+            'переменные': 1,
+            'типы данных': 2,
+            'условия': 3,
+            'циклы for': 4,
+            'функции': 5,
+            'списки': 6,
+            'словари': 7,
+            'циклы while': 8,
+            'строки': 9,
+            'алгоритмы': 10,
+        };
+
+        const TOPIC_DESCRIPTIONS = {
+            'переменные': {
+                ru: '📌 Переменные — это контейнеры для данных. Ты научишься создавать переменные, присваивать им значения и использовать их в коде.',
+                en: '📌 Variables are containers for data. You\'ll learn to create variables, assign values, and use them in code.'
+            },
+            'типы данных': {
+                ru: '📌 Типы данных — str, int, float, bool. Ты научишься различать их и использовать в своих программах.',
+                en: '📌 Data types — str, int, float, bool. You\'ll learn to distinguish and use them.'
+            },
+            'условия': {
+                ru: '📌 Условия (if/else) — позволяют программе принимать решения. Ты научишься использовать операторы сравнения и логические выражения.',
+                en: '📌 Conditions (if/else) — let your program make decisions. You\'ll learn comparison operators and logical expressions.'
+            },
+            'циклы for': {
+                ru: '📌 Циклы for — позволяют повторять код заданное количество раз. Ты научишься использовать range() и итерироваться по коллекциям.',
+                en: '📌 For loops — let you repeat code a specific number of times. You\'ll learn range() and iterating over collections.'
+            },
+            'циклы while': {
+                ru: '📌 Циклы while — повторяют код, пока условие истинно. Ты научишься создавать бесконечные циклы и правильно их завершать.',
+                en: '📌 While loops — repeat code while a condition is true. You\'ll learn infinite loops and how to break them.'
+            },
+            'функции': {
+                ru: '📌 Функции (def) — переиспользуемые блоки кода. Ты научишься создавать функции, передавать параметры и возвращать значения.',
+                en: '📌 Functions (def) — reusable code blocks. You\'ll learn to create functions, pass parameters, and return values.'
+            },
+            'списки': {
+                ru: '📌 Списки (list) — коллекции элементов. Ты научишься создавать, изменять и итерироваться по спискам.',
+                en: '📌 Lists — collections of elements. You\'ll learn to create, modify, and iterate over lists.'
+            },
+            'словари': {
+                ru: '📌 Словари (dict) — хранят пары ключ-значение. Ты научишься создавать словари, получать и изменять значения по ключу.',
+                en: '📌 Dictionaries (dict) — store key-value pairs. You\'ll learn to create dicts, get and set values by key.'
+            },
+            'строки': {
+                ru: '📌 Строки (str) — текст в кавычках. Ты научишься работать со строками: конкатенация, методы upper(), lower(), replace(), len().',
+                en: '📌 Strings (str) — text in quotes. You\'ll learn string operations: concatenation, upper(), lower(), replace(), len().'
+            },
+            'алгоритмы': {
+                ru: '📌 Алгоритмы — это пошаговые инструкции для решения задач. Ты научишься писать эффективные алгоритмы и оценивать их сложность.',
+                en: '📌 Algorithms — step-by-step instructions for solving problems. You\'ll learn to write efficient algorithms and evaluate complexity.'
+            },
+            'рекурсия': {
+                ru: '📌 Рекурсия — когда функция вызывает саму себя. Ты научишься решать задачи с помощью рекурсии (факториал, Фибоначчи, обход деревьев).',
+                en: '📌 Recursion — when a function calls itself. You\'ll learn to solve problems using recursion (factorial, Fibonacci, tree traversal).'
+            },
+            'графы': {
+                ru: '📌 Графы — структуры данных с вершинами и рёбрами. Ты научишься представлять графы и работать с ними.',
+                en: '📌 Graphs — data structures with vertices and edges. You\'ll learn to represent graphs and work with them.'
+            },
+            'dfs': {
+                ru: '📌 DFS (Depth-First Search) — алгоритм обхода графа в глубину. Ты научишься реализовывать DFS на Python и использовать его для поиска путей.',
+                en: '📌 DFS (Depth-First Search) — graph traversal algorithm. You\'ll learn to implement DFS in Python and use it for pathfinding.'
+            },
+            'сортировка': {
+                ru: '📌 Сортировка — упорядочивание элементов. Ты научишься реализовывать сортировку пузырьком, быструю сортировку и другие алгоритмы.',
+                en: '📌 Sorting — ordering elements. You\'ll learn to implement bubble sort, quicksort, and other sorting algorithms.'
+            },
+            'поиск': {
+                ru: '📌 Поиск — нахождение элемента в коллекции. Ты научишься реализовывать линейный и бинарный поиск.',
+                en: '📌 Search — finding an element in a collection. You\'ll learn to implement linear and binary search.'
+            },
+        };
+
+        // ================================================================
+        //  СОСТОЯНИЕ ПРИЛОЖЕНИЯ (я переименовала некоторые переменные по-своему)
+        // ================================================================
+        let текущийУрок = 0;
+        let решенныеЗадачи = LESSONS_DATA.map(l => l.tasks.map(() => false));
+        let очкиОпыта = 0;
+        let достижения = { firstBlood: false, perfectionist: false, speedDemon: false, scholar: false, master: false };
+        let серия = 0;
+        let последнееВремяРешения = 0;
+
+        // ================================================================
+        //  DOM-ЭЛЕМЕНТЫ
+        // ================================================================
+        const langButtons = document.querySelectorAll('#langSwitch button');
+        const nav = document.getElementById('lessonNav');
+        const titleEl = document.getElementById('lessonTitle');
+        const theoryEl = document.getElementById('lessonTheory');
+        const exampleEl = document.getElementById('lessonExample');
+        const tasksContainer = document.getElementById('tasksContainer');
+        const resetBtn = document.getElementById('resetBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const progressFill = document.getElementById('progressFill');
+        const currentNumEl = document.getElementById('currentLessonNum');
+        const totalLessonsEl = document.getElementById('totalLessons');
+        const xpDisplay = document.getElementById('xpDisplay');
+        const mainResult = document.getElementById('mainResult');
+        const aiChat = document.getElementById('aiChat');
+        const aiInput = document.getElementById('aiInput');
+        const aiSendBtn = document.getElementById('aiSendBtn');
+
+        // ================================================================
+        //  ПЕРЕКЛЮЧЕНИЕ ЯЗЫКА
+        // ================================================================
+        function setLanguage(lang) {
+            currentLang = lang;
+            langButtons.forEach(b => {
+                b.classList.toggle('active', b.dataset.lang === lang);
+            });
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                if (LANG[lang][key] !== undefined) {
+                    el.textContent = LANG[lang][key];
+                }
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.dataset.i18nPlaceholder;
+                if (LANG[lang][key] !== undefined) {
+                    el.placeholder = LANG[lang][key];
+                }
+            });
+            const welcomeEl = aiChat.querySelector('.ai-message.bot');
+            if (welcomeEl && welcomeEl.dataset.i18n === 'ai_welcome') {
+                welcomeEl.textContent = LANG[lang].ai_welcome;
+            }
+            renderLesson();
+        }
+
+        langButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                setLanguage(btn.dataset.lang);
+            });
+        });
+
+        // ================================================================
+        //  ПОМОЩНИКИ
+        // ================================================================
+        function getLang() { return currentLang; }
+
+        function getText(obj) { return obj[getLang()] || obj.en; }
+
+        function getTaskText(task) {
+            return getLang() === 'ru' ? task.text_ru : task.text_en;
+        }
+
+        // ================================================================
+        //  ДОСТИЖЕНИЯ — МОЯ ГОРДОСТЬ!
+        // ================================================================
+        function updateAchievements() {
+            const total = LESSONS_DATA.reduce((acc, l) => acc + l.tasks.length, 0);
+            const done = решенныеЗадачи.reduce((acc, l) => acc + l.filter(v => v).length, 0);
+
+            if (done >= 1 && !достижения.firstBlood) {
+                достижения.firstBlood = true;
+                unlockAchievement('achFirstBlood', '⚡ First Blood');
+            }
+            if (решенныеЗадачи.some(tasks => tasks.every(v => v === true)) && !достижения.perfectionist) {
+                достижения.perfectionist = true;
+                unlockAchievement('achPerfectionist', '💎 Perfectionist');
+            }
+            if (done >= 15 && !достижения.scholar) {
+                достижения.scholar = true;
+                unlockAchievement('achScholar', '📖 Scholar');
+            }
+            if (done === total && !достижения.master) {
+                достижения.master = true;
+                unlockAchievement('achMaster', '👑 Master');
+            }
+            очкиОпыта = done * 10 + (достижения.master ? 100 : 0) + (достижения.scholar ? 50 : 0);
+            xpDisplay.textContent = очкиОпыта;
+        }
+
+        function unlockAchievement(elId, name) {
+            const el = document.getElementById(elId);
+            if (el) {
+                el.classList.add('unlocked');
+                el.innerHTML = el.innerHTML + ' ✨';
+            }
+            addAIMessage(`🏆 ${name} unlocked!`, 'bot');
+        }
+
+        // ================================================================
+        //  УМНЫЙ AI-ПОМОЩНИК (Я ЕГО ПЕРЕПИСЫВАЛА 2 РАЗА)
+        // ================================================================
+
+        function extractGoalFromQuery(q) {
+            const goalKeywords = {
+                'dfs': 'dfs',
+                'граф': 'графы',
+                'graph': 'графы',
+                'рекурс': 'рекурсия',
+                'recursion': 'рекурсия',
+                'сортировк': 'сортировка',
+                'sort': 'сортировка',
+                'поиск': 'поиск',
+                'search': 'поиск',
+                'алгоритм': 'алгоритмы',
+                'algorithm': 'алгоритмы',
+                'класс': 'классы',
+                'class': 'классы',
+                'ооп': 'ооп',
+                'файл': 'работа с файлами',
+                'file': 'работа с файлами',
+                'исключени': 'исключения',
+                'exception': 'исключения',
+                'библиотек': 'библиотеки',
+                'library': 'библиотеки',
+                'list': 'списки',
+                'dict': 'словари',
+                'словар': 'словари',
+                'цикл': 'циклы for',
+                'loop': 'циклы for',
+                'услови': 'условия',
+                'if': 'условия',
+                'функци': 'функции',
+                'function': 'функции',
+            };
+
+            for (const [key, value] of Object.entries(goalKeywords)) {
+                if (q.includes(key)) {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        function extractKnownTopicsFromQuery(q, lang) {
+            const known = [];
+            const topicNames = lang === 'ru' ?
+                ['переменные', 'типы данных', 'условия', 'циклы for', 'циклы while', 'функции', 'списки', 'словари',
+                    'строки', 'алгоритмы'
+                ] :
+                ['variables', 'data types', 'conditions', 'for loops', 'while loops', 'functions', 'lists', 'dictionaries',
+                    'strings', 'algorithms'
+                ];
+
+            for (const topic of topicNames) {
+                if (q.includes(topic)) {
+                    known.push(topic);
+                }
+            }
+
+            if (q.includes('знаю') || q.includes('know')) {
+                const parts = q.split(/знаю|know|уже знаю|already know/i);
+                if (parts.length > 1) {
+                    const knownPart = parts[1].toLowerCase();
+                    for (const topic of topicNames) {
+                        if (knownPart.includes(topic)) {
+                            if (!known.includes(topic)) known.push(topic);
+                        }
+                    }
+                }
+            }
+
+            return known;
+        }
+
+        function getPrerequisitesForTopic(topic) {
+            if (TOPIC_PREREQUISITES[topic]) {
+                let result = [];
+                const direct = TOPIC_PREREQUISITES[topic];
+                for (const prereq of direct) {
+                    result.push(prereq);
+                    const subPrereqs = getPrerequisitesForTopic(prereq);
+                    for (const sub of subPrereqs) {
+                        if (!result.includes(sub)) {
+                            result.push(sub);
+                        }
+                    }
+                }
+                return result;
+            }
+            return [];
+        }
+
+        function buildPlanResponse(goal, knownTopics, missingTopics, lang) {
+            const lessonNum = TOPIC_LESSON_MAP[goal] || '?';
+
+            let response = '';
+            if (lang === 'ru') {
+                response += `🎯 <b>Твоя цель:</b> изучить <b>${goal}</b>\n\n`;
+
+                if (knownTopics.length > 0) {
+                    response += `✅ <b>Ты уже знаешь:</b> ${knownTopics.join(', ')}\n\n`;
+                } else {
+                    response +=
+                        `📚 <b>Сейчас:</b> похоже, ты начинаешь с нуля. Это отлично! Начнём с самых основ.\n\n`;
+                }
+
+                if (missingTopics.length === 0 && knownTopics.length > 0) {
+                    response += `🔥 <b>Отлично!</b> У тебя уже есть все знания для изучения <b>${goal}</b>!\n\n`;
+                    response += `📖 Переходи к изучению <b>${goal}</b> и начинай практиковаться!\n\n`;
+                    response += `💪 Ты готов(а)! Удачи! 🚀`;
+                    return response;
+                }
+
+                response += `📋 <b>Чтобы изучить ${goal}, тебе нужно пройти эти темы по порядку:</b>\n\n`;
+
+                const path = [...missingTopics, goal];
+                const uniquePath = [];
+                for (const item of path) {
+                    if (!uniquePath.includes(item)) {
+                        uniquePath.push(item);
+                    }
+                }
+
+                const sortedPath = uniquePath.sort((a, b) => {
+                    const numA = TOPIC_LESSON_MAP[a] || 99;
+                    const numB = TOPIC_LESSON_MAP[b] || 99;
+                    return numA - numB;
+                });
+
+                let stepNum = 1;
+                for (const topic of sortedPath) {
+                    const num = TOPIC_LESSON_MAP[topic] || '?';
+                    const desc = TOPIC_DESCRIPTIONS[topic]?.ru || '';
+                    const isGoal = topic === goal;
+                    const icon = isGoal ? '🏆' : '📘';
+                    const knownMark = knownTopics.includes(topic) ? ' ✅ (уже знаешь)' : '';
+                    response += `${stepNum}. ${icon} <b>${topic}</b> — урок ${num}${knownMark}\n`;
+                    if (desc) {
+                        response += `   ${desc}\n`;
+                    }
+                    stepNum++;
+                }
+
+                response +=
+                    `\n⏱️ <b>Примерное время:</b> ${sortedPath.length * 2}-${sortedPath.length * 4} дней при ежедневных занятиях.\n\n`;
+                response +=
+                    `💡 <b>Совет:</b> не торопись! Проходи каждую тему, решай все задачи и только потом переходи к следующей.\n\n`;
+                response += `💪 Ты справишься! Я здесь, чтобы помочь на каждом этапе. 🚀`;
+
+            } else {
+                // English version
+                response += `🎯 <b>Your goal:</b> learn <b>${goal}</b>\n\n`;
+
+                if (knownTopics.length > 0) {
+                    response += `✅ <b>You already know:</b> ${knownTopics.join(', ')}\n\n`;
+                } else {
+                    response +=
+                        `📚 <b>Current level:</b> looks like you're starting from scratch. That's great! Let's begin with the basics.\n\n`;
+                }
+
+                if (missingTopics.length === 0 && knownTopics.length > 0) {
+                    response += `🔥 <b>Great!</b> You already have all the knowledge to learn <b>${goal}</b>!\n\n`;
+                    response += `📖 Go ahead and learn <b>${goal}</b>!\n\n`;
+                    response += `💪 You're ready! Good luck! 🚀`;
+                    return response;
+                }
+
+                response += `📋 <b>To learn ${goal}, you need to go through these topics in order:</b>\n\n`;
+
+                const path = [...missingTopics, goal];
+                const uniquePath = [];
+                for (const item of path) {
+                    if (!uniquePath.includes(item)) {
+                        uniquePath.push(item);
+                    }
+                }
+
+                const sortedPath = uniquePath.sort((a, b) => {
+                    const numA = TOPIC_LESSON_MAP[a] || 99;
+                    const numB = TOPIC_LESSON_MAP[b] || 99;
+                    return numA - numB;
+                });
+
+                let stepNum = 1;
+                for (const topic of sortedPath) {
+                    const num = TOPIC_LESSON_MAP[topic] || '?';
+                    const desc = TOPIC_DESCRIPTIONS[topic]?.en || '';
+                    const isGoal = topic === goal;
+                    const icon = isGoal ? '🏆' : '📘';
+                    const knownMark = knownTopics.includes(topic) ? ' ✅ (already know)' : '';
+                    response += `${stepNum}. ${icon} <b>${topic}</b> — lesson ${num}${knownMark}\n`;
+                    if (desc) {
+                        response += `   ${desc}\n`;
+                    }
+                    stepNum++;
+                }
+
+                response +=
+                    `\n⏱️ <b>Estimated time:</b> ${sortedPath.length * 2}-${sortedPath.length * 4} days with daily practice.\n\n`;
+                response +=
+                    `💡 <b>Tip:</b> take your time! Master each topic, solve all tasks, then move to the next.\n\n`;
+                response += `💪 You've got this! I'm here to help at every step. 🚀`;
+            }
+
+            return response;
+        }
+
+        function generatePlan(query) {
+            const lang = getLang();
+            const q = query.toLowerCase();
+
+            const goal = extractGoalFromQuery(q);
+            if (!goal) {
+                return lang === 'ru' ?
+                    '🤔 Я не поняла, что именно ты хочешь изучить. Напиши, например: *"Хочу изучить DFS"* или *"Помоги разобраться с рекурсией"*.' :
+                    '🤔 I didn\'t understand what you want to learn. Write, for example: *"I want to learn DFS"* or *"Help me understand recursion"*.';
+            }
+
+            let knownTopics = extractKnownTopicsFromQuery(q, lang);
+
+            const prerequisites = getPrerequisitesForTopic(goal);
+            const missingTopics = prerequisites.filter(t => !knownTopics.includes(t));
+
+            return buildPlanResponse(goal, knownTopics, missingTopics, lang);
+        }
+
+        // ================================================================
+        //  ОТРИСОВКА (ТУТ ВСЁ РАБОТАЕТ, НО Я ПЕРЕПИСЫВАЛА 2 РАЗА)
+        // ================================================================
+        function renderNav() {
+            nav.innerHTML = '';
+            LESSONS_DATA.forEach((lesson, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = `${index+1}. ${getText(lesson.title)}`;
+                btn.dataset.index = index;
+                if (index === текущийУрок) btn.classList.add('active');
+                const allDone = решенныеЗадачи[index].every(v => v === true);
+                if (allDone) btn.classList.add('done');
+                btn.addEventListener('click', () => goToLesson(index));
+                nav.appendChild(btn);
+            });
+            totalLessonsEl.textContent = LESSONS_DATA.length;
+            currentNumEl.textContent = текущийУрок + 1;
+        }
+
+        function renderLesson() {
+            const lesson = LESSONS_DATA[текущийУрок];
+            titleEl.textContent = getText(lesson.title);
+            theoryEl.textContent = getText(lesson.theory);
+            exampleEl.textContent = getText(lesson.example);
+
+            renderTasks(lesson);
+            updateProgress();
+            renderNav();
+            updateAchievements();
+
+            const mainDone = решенныеЗадачи[текущийУрок][0];
+            if (mainDone) {
+                nextBtn.disabled = false;
+                const allDone = решенныеЗадачи[текущийУрок].every(v => v === true);
+                if (allDone) {
+                    showMainResult('success', getLang() === 'ru' ? '🎉 Все задачи (включая дополнительные) решены! Ты супер! *виртуальные аплодисменты*' :
+                        '🎉 All tasks (including bonuses) done! You\'re amazing! *virtual applause*');
+                } else {
+                    showMainResult('success', getLang() === 'ru' ?
+                        '✅ Обязательная задача решена! Можешь переходить к следующему уроку или решать дополнительные (они необязательные, но полезные!).' :
+                        '✅ Main task done! You can move on or solve bonus tasks (they\'re optional but helpful!).');
+                }
+            } else {
+                nextBtn.disabled = true;
+                hideMainResult();
+            }
+        }
+
+        function renderTasks(lesson) {
+            tasksContainer.innerHTML = '';
+            lesson.tasks.forEach((task, idx) => {
+                const isBonus = idx > 0;
+                const isDone = решенныеЗадачи[текущийУрок][idx];
+
+                const div = document.createElement('div');
+                div.className = `task-item ${isBonus ? 'bonus' : ''} ${isDone ? 'completed' : ''}`;
+
+                const header = document.createElement('div');
+                header.className = 'task-header';
+
+                const textSpan = document.createElement('span');
+                textSpan.className = 'task-text';
+                textSpan.innerHTML = getTaskText(task);
+                header.appendChild(textSpan);
+
+                const status = document.createElement('span');
+                status.className = `task-status ${isDone ? 'done' : ''} ${isBonus ? 'bonus-label' : ''}`;
+                status.textContent = isDone ? LANG[getLang()].done : (isBonus ? LANG[getLang()].bonus : LANG[getLang()]
+                    .required);
+                header.appendChild(status);
+
+                div.appendChild(header);
+
+                const input = document.createElement('textarea');
+                input.className = 'task-input';
+                input.placeholder = isBonus ? LANG[getLang()].write_code_optional : LANG[getLang()].write_code;
+                input.disabled = isDone;
+                if (isDone) input.value = task.solution;
+                div.appendChild(input);
+
+                const actions = document.createElement('div');
+                actions.className = 'task-actions';
+
+                const checkBtn = document.createElement('button');
+                checkBtn.className = 'btn-sm primary';
+                checkBtn.textContent = LANG[getLang()].check;
+                checkBtn.disabled = isDone;
+                checkBtn.addEventListener('click', () => {
+                    if (isDone) return;
+                    const userCode = input.value.trim();
+                    if (!userCode) {
+                        showTaskResult(div, 'error', LANG[getLang()].write_something);
+                        return;
+                    }
+                    const isCorrect = task.check(userCode);
+                    if (isCorrect) {
+                        решенныеЗадачи[текущийУрок][idx] = true;
+                        const now = Date.now();
+                        if (последнееВремяРешения > 0 && (now - последнееВремяРешения) < 120000) {
+                            серия++;
+                            if (серия >= 3 && !достижения.speedDemon) {
+                                достижения.speedDemon = true;
+                                unlockAchievement('achSpeedDemon', '🔥 Speed Demon');
+                            }
+                        } else {
+                            серия = 1;
+                        }
+                        последнееВремяРешения = now;
+                        renderLesson();
+                        showTaskResult(div, 'success', LANG[getLang()].correct);
+                        addAIMessage(`${LANG[getLang()].task_done_ai} ${idx+1}! ${LANG[getLang()].keep_going}`, 'bot');
+                    } else {
+                        showTaskResult(div, 'error', LANG[getLang()].wrong);
+                    }
+                });
+                actions.appendChild(checkBtn);
+
+                const hintBtn = document.createElement('button');
+                hintBtn.className = 'btn-sm ai-hint';
+                hintBtn.textContent = LANG[getLang()].ai_hint;
+                hintBtn.addEventListener('click', () => {
+                    const hint = generateHint(текущийУрок, idx);
+                    showTaskResult(div, 'hint', '💡 ' + hint);
+                });
+                actions.appendChild(hintBtn);
+
+                const resetTaskBtn = document.createElement('button');
+                resetTaskBtn.className = 'btn-sm secondary';
+                resetTaskBtn.textContent = LANG[getLang()].reset_task;
+                resetTaskBtn.addEventListener('click', () => {
+                    if (isDone && idx === 0) {
+                        showTaskResult(div, 'error', LANG[getLang()].cant_reset);
+                        return;
+                    }
+                    if (isDone) {
+                        решенныеЗадачи[текущийУрок][idx] = false;
+                        renderLesson();
+                        return;
+                    }
+                    input.value = '';
+                    hideTaskResult(div);
+                });
+                actions.appendChild(resetTaskBtn);
+
+                div.appendChild(actions);
+
+                const result = document.createElement('div');
+                result.className = 'task-result';
+                div.appendChild(result);
+
+                tasksContainer.appendChild(div);
+            });
+        }
+
+        // ================================================================
+        //  AI-ПОМОЩНИК (ЧАТ)
+        // ================================================================
+        function generateHint(lessonIdx, taskIdx) {
+            const lesson = LESSONS_DATA[lessonIdx];
+            const task = lesson.tasks[taskIdx];
+            const hints_ru = [
+                `Попробуй написать: ${getTaskText(task).replace(/<code>|<\/code>/g, '').slice(0, 40)}...`,
+                `В Python переменные создаются через <code>=</code>.`,
+                `Проверь кавычки: используй <code>"</code> для текста.`,
+                `Убедись, что нет лишних пробелов.`,
+                `Посмотри на пример выше.`,
+                `Пиши шаг за шагом.`,
+                `Подумай, какой тип данных нужен (текст, число, логическое).`,
+                `Проверь, нужен ли <code>:</code> после условий или циклов.`,
+                `Python чувствителен к отступам!`,
+                `Ты сможешь! Попробуй ещё раз.`
+            ];
+            const hints_en = [
+                `Try writing: ${getTaskText(task).replace(/<code>|<\/code>/g, '').slice(0, 40)}...`,
+                `In Python, variables use <code>=</code>.`,
+                `Check your quotes: use <code>"</code> for text.`,
+                `Make sure there are no extra spaces.`,
+                `Look at the example above.`,
+                `Write it step by step.`,
+                `Think about what type of value you need.`,
+                `Check if you need <code>:</code> after conditions or loops.`,
+                `Python cares about indentation!`,
+                `You can do it! Try again.`
+            ];
+            const hints = getLang() === 'ru' ? hints_ru : hints_en;
+            return hints[taskIdx % hints.length];
+        }
+
+        function addAIMessage(text, sender) {
+            const div = document.createElement('div');
+            div.className = `ai-message ${sender}`;
+            div.innerHTML = text;
+            aiChat.appendChild(div);
+            aiChat.scrollTop = aiChat.scrollHeight;
+        }
+
+        function handleAIQuery(query) {
+            const q = query.toLowerCase().trim();
+            addAIMessage(q, 'user');
+
+            if (q.includes('plan') || q.includes('помоги') || q.includes('хочу изучить') || q.includes('help me learn') || q
+                .includes('know') || q.includes('знаю')) {
+                const plan = generatePlan(q);
+                addAIMessage(plan, 'bot');
+                return;
+            }
+
+            if (q.includes('hint') || q.includes('подсказк') || q.includes('help') || q.includes('помоги')) {
+                const lesson = LESSONS_DATA[текущийУрок];
+                const firstIncomplete = lesson.tasks.findIndex((t, i) => !решенныеЗадачи[текущийУрок][i]);
+                const idx = firstIncomplete !== -1 ? firstIncomplete : 0;
+                const hint = generateHint(текущийУрок, idx);
+                addAIMessage(`💡 ${getLang() === 'ru' ? 'Для задачи' : 'For task'} ${idx+1}: ${hint}`, 'bot');
+                return;
+            }
+
+            if (q.includes('explain') || q.includes('объясни') || q.includes('what is') || q.includes('что такое')) {
+                const concepts = {
+                    'variable': getLang() === 'ru' ?
+                        'Переменная хранит данные. Как коробка с ярлыком. Пример: <code>x = 5</code>' :
+                        'A variable stores data. Like a box with a label. Example: <code>x = 5</code>',
+                    'string': getLang() === 'ru' ?
+                        'Строка — это текст в кавычках. Пример: <code>name = "Анна"</code>' :
+                        'A string is text in quotes. Example: <code>name = "Anna"</code>',
+                    'int': getLang() === 'ru' ?
+                        'Целое число (int) — без запятой. Пример: <code>age = 14</code>' :
+                        'An integer is a whole number. Example: <code>age = 14</code>',
+                    'float': getLang() === 'ru' ?
+                        'Число с плавающей точкой (float) — с десятичной частью. Пример: <code>height = 1.65</code>' :
+                        'A float is a number with a decimal. Example: <code>height = 1.65</code>',
+                    'bool': getLang() === 'ru' ?
+                        'Булевое значение — True или False. Пример: <code>is_student = True</code>' :
+                        'A boolean is True or False. Example: <code>is_student = True</code>',
+                    'if': getLang() === 'ru' ?
+                        'Если (if) проверяет условие. Пример: <code>if x > 5: print("да")</code>' :
+                        'If checks a condition. Example: <code>if x > 5: print("yes")</code>',
+                    'loop': getLang() === 'ru' ?
+                        'Цикл повторяет код. Пример: <code>for i in range(3): print(i)</code>' :
+                        'A loop repeats code. Example: <code>for i in range(3): print(i)</code>',
+                    'function': getLang() === 'ru' ?
+                        'Функция — переиспользуемый код. Пример: <code>def hello(): print("hi")</code>' :
+                        'A function is reusable code. Example: <code>def hello(): print("hi")</code>',
+                    'list': getLang() === 'ru' ?
+                        'Список — коллекция элементов. Пример: <code>fruits = ["яблоко", "банан"]</code>' :
+                        'A list is a collection. Example: <code>fruits = ["apple", "banana"]</code>',
+                    'dict': getLang() === 'ru' ?
+                        'Словарь — пары ключ→значение. Пример: <code>person = {"name": "Анна"}</code>' :
+                        'A dictionary stores key→value pairs. Example: <code>person = {"name": "Anna"}</code>',
+                };
+                let response = getLang() === 'ru' ?
+                    'Я могу объяснить: переменные, строки, int, float, bool, if, циклы, функции, списки, словари. Что именно?' :
+                    'I can explain: variables, strings, int, float, bool, if, loops, functions, lists, dictionaries. Which one?';
+                for (const [key, value] of Object.entries(concepts)) {
+                    if (q.includes(key)) {
+                        response = value;
+                        break;
+                    }
+                }
+                addAIMessage(response, 'bot');
+                return;
+            }
+
+            if (q.includes('fix') || q.includes('исправ') || q.includes('error') || q.includes('ошибк')) {
+                addAIMessage(getLang() === 'ru' ?
+                    '🔧 Пришли свой код, и я помогу найти ошибки! Частые проблемы: кавычки, двоеточия, отступы.' :
+                    '🔧 Paste your code and I\'ll help find errors! Common issues: quotes, colons, indentation.', 'bot');
+                return;
+            }
+
+            addAIMessage(getLang() === 'ru' ?
+                '🤔 Я здесь, чтобы помочь! Спрашивай: подсказки, объяснения, план обучения, или помощь с кодом.' :
+                '🤔 I\'m here to help! Ask for: hints, explanations, learning plans, or code help.', 'bot');
+        }
+
+        // ================================================================
+        //  UI-ПОМОЩНИКИ
+        // ================================================================
+        function showTaskResult(container, type, message) {
+            const result = container.querySelector('.task-result');
+            result.className = `task-result show ${type}`;
+            result.innerHTML = message;
+        }
+
+        function hideTaskResult(container) {
+            const result = container.querySelector('.task-result');
+            result.className = 'task-result';
+            result.innerHTML = '';
+        }
+
+        function showMainResult(type, message) {
+            mainResult.className = `main-result show ${type}`;
+            mainResult.textContent = message;
+        }
+
+        function hideMainResult() {
+            mainResult.className = 'main-result';
+            mainResult.textContent = '';
+        }
+
+        function updateProgress() {
+            const allTasks = LESSONS_DATA.reduce((acc, l) => acc + l.tasks.length, 0);
+            const doneTasks = решенныеЗадачи.reduce((acc, l) => acc + l.filter(v => v).length, 0);
+            const percent = (doneTasks / allTasks) * 100;
+            progressFill.style.width = percent + '%';
+        }
+
+        // ================================================================
+        //  НАВИГАЦИЯ
+        // ================================================================
+        function goToLesson(index) {
+            if (index < 0 || index >= LESSONS_DATA.length) return;
+            текущийУрок = index;
+            hideMainResult();
+            renderLesson();
+            document.querySelector('.app').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function resetAll() {
+            const msg = getLang() === 'ru' ? 'Сбросить весь прогресс? (все твои достижения исчезнут!)' :
+                'Reset all progress? (all your achievements will disappear!)';
+            if (confirm(msg)) {
+                решенныеЗадачи = LESSONS_DATA.map(l => l.tasks.map(() => false));
+                достижения = { firstBlood: false, perfectionist: false, speedDemon: false, scholar: false,
+                master: false };
+                серия = 0;
+                последнееВремяРешения = 0;
+                document.querySelectorAll('.achievement').forEach(el => el.classList.remove('unlocked'));
+                текущийУрок = 0;
+                hideMainResult();
+                renderLesson();
+                renderNav();
+                updateProgress();
+                updateAchievements();
+                const msg2 = getLang() === 'ru' ? '🔄 Прогресс сброшен. Начинай заново! (я грущу, но это твой выбор)' :
+                    '🔄 Progress reset. Start fresh! (I\'m sad, but it\'s your choice)';
+                addAIMessage(msg2, 'bot');
+            }
+        }
+
+        function nextLesson() {
+            if (nextBtn.disabled) return;
+            const next = текущийУрок + 1;
+            if (next >= LESSONS_DATA.length) {
+                const msg = getLang() === 'ru' ?
+                    '🏆 ПОЗДРАВЛЯЮ! Ты прошел(а) все 10 уроков! Ты настоящий программист! 👑 (я плачу от счастья)' :
+                    '🏆 CONGRATULATIONS! You completed all 10 lessons! You\'re a Python Master! 👑 (I\'m crying with joy)';
+                showMainResult('success', msg);
+                nextBtn.disabled = true;
+                addAIMessage('🎉🎉🎉 AMAZING! You completed everything! You\'re a real programmer now! 🚀', 'bot');
+                return;
+            }
+            текущийУрок = next;
+            hideMainResult();
+            renderLesson();
+            const msg = getLang() === 'ru' ?
+                `📚 Переходим к уроку ${next+1}: ${getText(LESSONS_DATA[next].title)}. Поехали!` :
+                `📚 Moving to Lesson ${next+1}: ${getText(LESSONS_DATA[next].title)}. Let's go!`;
+            addAIMessage(msg, 'bot');
+            document.querySelector('.app').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // ================================================================
+        //  БЫСТРЫЕ КНОПКИ AI
+        // ================================================================
+        document.querySelectorAll('[data-hint]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.dataset.hint;
+                const map = {
+                    'hint': getLang() === 'ru' ? 'Дай подсказку к этой задаче' : 'Give me a hint for this task',
+                    'explain': getLang() === 'ru' ? 'Объясни, что мне нужно сделать' : 'Explain what I need to do',
+                    'plan': getLang() === 'ru' ? 'Помоги изучить Python, я знаю переменные' :
+                        'Help me learn Python, I know variables',
+                    'fix': getLang() === 'ru' ? 'Мой код с ошибкой, помоги исправить' : 'My code has an error, help me fix it'
+                };
+                const msg = map[type] || '';
+                aiInput.value = msg;
+                handleAIQuery(msg);
+                aiInput.value = '';
+            });
+        });
+
+        // ================================================================
+        //  ОТПРАВКА СООБЩЕНИЯ В AI
+        // ================================================================
+        aiSendBtn.addEventListener('click', () => {
+            const q = aiInput.value.trim();
+            if (!q) return;
+            handleAIQuery(q);
+            aiInput.value = '';
+        });
+
+        aiInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                aiSendBtn.click();
+            }
+        });
+
+        // ================================================================
+        //  ГОРЯЧИЕ КЛАВИШИ
+        // ================================================================
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+                e.preventDefault();
+                resetAll();
+            }
+        });
+
+        // ================================================================
+        //  ЗАПУСК
+        // ================================================================
+        function init() {
+            const browserLang = navigator.language || 'en';
+            const defaultLang = browserLang.startsWith('ru') ? 'ru' : 'en';
+            setLanguage(defaultLang);
+            renderNav();
+            renderLesson();
+            updateProgress();ф
+            updateAchievements();
+            const welcome = getLang() === 'ru' ?
+                '👋 Привет! Я твой AI-помощник. Спрашивай подсказки, объяснения или скажи, что хочешь изучить — я составлю план!' :
+                '👋 Hi! I\'m your AI tutor. Ask me for hints, explain concepts, or tell me what you want to learn and I\'ll build a plan for you!';
+            addAIMessage(welcome, 'bot');
+            console.log('🐍 PyLearner AI loaded!');
+            console.log('💡 Shortcut: Ctrl+Shift+R to reset');
+            console.log('🤖 AI Tutor ready with advanced planning!');
+            console.log('❤️ Made by Anna with lots of coffee and debugging');
+        }
+
+        init();
+    </script>
+</body>
+</html>
