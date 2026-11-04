@@ -730,12 +730,18 @@
 </head>
 <body>
 
-    <div class="name-modal" id="nameModal">
+        <div class="name-modal" id="nameModal">
         <div class="box">
+            <!-- ДОБАВЛЕНО: Крестик для закрытия -->
+            <button class="close-name-modal" onclick="document.getElementById('nameModal').classList.remove('active')" style="float: right; background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">✕</button>
+            
             <h2>🏆 Привет!</h2>
             <p>Введи имя для сертификата</p>
             <input type="text" id="userNameInput" placeholder="Твоё имя..." />
             <button class="btn" id="saveNameBtn">Сохранить</button>
+            
+            <!-- ДОБАВЛЕНО: Кнопка "Продолжить как гость" -->
+            <button class="btn btn-secondary" onclick="document.getElementById('nameModal').classList.remove('active')" style="margin-top: 10px; width: 100%;">Продолжить как гость</button>
         </div>
     </div>
 
@@ -4438,7 +4444,7 @@ var projectCompleted = {};
             document.getElementById('xpDisplay').textContent = xp;
             document.getElementById('levelDisplay').textContent = '⭐ Ур. ' + level;
             document.getElementById('userNameDisplay').textContent = userName ? '👤 ' + userName : '👤';
-            if (!userName) document.getElementById('nameModal').classList.add('active');
+            //if (!userName) document.getElementById('nameModal').classList.add('active');
             calcLevel();
             renderAchievements();
             renderProjects();
@@ -4758,6 +4764,9 @@ var projectCompleted = {};
         //  СЕРТИФИКАТ
         // ================================================================
         function generateCertificate() {
+            if (!userName) {
+                userName = "Гость";
+            }
             var totalTasks = 0,
                 totalAll = 0;
             for (var key in completed) {
